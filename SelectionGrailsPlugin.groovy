@@ -20,7 +20,7 @@ import grails.plugins.selection.GrailsSelectionClass
 
 class SelectionGrailsPlugin {
     // the plugin version
-    def version = "0.3"
+    def version = "0.4"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "2.0 > *"
     // the other plugins this plugin depends on
@@ -76,6 +76,9 @@ Example 4: http://api.my-company.com/rest/events?system=42
     }
 
     def doWithSpring = {
+        // Create default criteria factory.
+        selectionCriteriaFactory(grails.plugins.selection.GormCriteriaFactory)
+        
         // Configure selection handlers
         def selectionClasses = application.selectionClasses
         selectionClasses.each { selectionClass ->

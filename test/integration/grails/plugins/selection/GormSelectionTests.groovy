@@ -167,4 +167,68 @@ public class GormSelectionTests extends GroovyTestCase {
             gormSelection.fixedCriteria = null
         }
     }
+
+    void testCustomCriteria() {
+
+        new TestEntity(name: "Joe Average", age: 40).save(flush: true)
+        new TestEntity(name: "Linda Average", age: 37).save(flush: true)
+        new TestEntity(name: "Jason Average", age: 11).save(flush: true)
+        new TestEntity(name: "Lisa Average", age: 9).save(flush: true)
+        new TestEntity(name: "Ben Average", age: 63).save(flush: true)
+        new TestEntity(name: "Mary Average", age: 65).save(flush: true)
+
+        def backup = gormSelection.getCriteria(TestEntity)
+
+        gormSelection.setCriteria(TestEntity) {query, params ->
+            if (query.name) {
+                ilike('name', '%' + query.name + '%')
+            }
+            if (query.age) {
+                if (query.age[0] == '<') {
+                    lt('age', Integer.valueOf(query.age[1..-1]))
+                } else if (query.age[0] == '>') {
+                    gt('age', Integer.valueOf(query.age[1..-1]))
+                } else if (query.age.indexOf('-') != -1) {
+                    def (from, to) = query.age.split('-').toList()
+                    between('age', Integer.valueOf(from), Integer.valueOf(to))
+                } else {
+                    eq('age', Integer.valueOf(query.age))
+                }
+            }
+        }
+        try {
+            // Test greater than.
+            def result = selectionService.select("gorm://test.TestEntity/list?age=" + ">40".encodeAsURL())
+            assert result.size() == 2
+            result.each {assert it.age > 40}
+
+            // Test less than.
+            result = selectionService.select("gorm://test.TestEntity/list?age=" + "<40".encodeAsURL())
+            assert result.size() == 3
+            result.each {assert it.age < 40}
+
+            // Test equals.
+            result = selectionService.select("gorm://test.TestEntity/list?age=40")
+            assert result.size() == 1
+            result.each {assert it.age == 40}
+
+
+            // Test between.
+            result = selectionService.select("gorm://test.TestEntity/list?age=10-40")
+            assert result.size() == 3
+            result.each {assert it.age >= 10 && it.age <= 40}
+
+            // Test between and name combined, this should not match.
+            result = selectionService.select("gorm://test.TestEntity/list?name=Lisa&age=10-40")
+            assert result.size() == 0
+
+            // Test between and name combined.
+            result = selectionService.select("gorm://test.TestEntity/list?name=Jason&age=10-40")
+            assert result.size() == 1
+            result.each {assert it.age == 11 && it.name == "Jason Average"}
+        } finally {
+            gormSelection.setCriteria(TestEntity, backup)
+        }
+
+    }
 }

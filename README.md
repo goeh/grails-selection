@@ -1,4 +1,4 @@
-# Grails Selection Plugin
+#Grails Selection Plugin
 
 The selection plugin provides unified selection of information.
 It uses a URI based syntax to select any information from any resource.

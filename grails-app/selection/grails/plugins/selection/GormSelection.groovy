@@ -31,6 +31,9 @@ class GormSelection {
 
     def grailsApplication
 
+    //GormCriteriaFactory criteriaFactory = new GormCriteriaFactory()
+    def selectionCriteriaFactory
+    
     /*
      * Criteria applied to all list queries.
      * Please note that /get queries do not use the fixed criteria.
@@ -190,25 +193,11 @@ class GormSelection {
     }
 
     private Closure getCriteria(Class clazz) {
-        {Map query, Map params ->
-            query.each {key, value ->
-                if (value) {
-                    ilike(key, wildcard(value))
-                }
-            }
-        }
+        selectionCriteriaFactory.getCriteria(clazz)
     }
 
-    private String wildcard(String q) {
-        q = q.toLowerCase()
-        if (q.contains('*')) {
-            return q.replace('*', '%')
-        } else if (q[0] == '=') { // Exact match.
-            return q[1..-1]
-        } else { // Starts with is default.
-            return q + '%'
-        }
+    public void setCriteria(Class clazz, Closure criteria)
+    {
+        selectionCriteriaFactory.setCriteria(clazz, criteria)
     }
-
-
 }
