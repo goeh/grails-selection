@@ -44,19 +44,19 @@ class GormSelection {
      * @return true if uri.scheme is 'gorm'
      */
     boolean supports(URI uri) {
-        return uri.scheme == 'gorm'
+        return uri?.scheme == 'gorm'
     }
 
     def select(URI uri, Map params) {
         if (uri == null) {
             throw new IllegalArgumentException("mandatory parameter [uri] is null")
         }
-        if (uri.scheme.toLowerCase() != 'gorm') {
+        if (!supports(uri)) {
             throw new IllegalArgumentException("URI scheme [${uri.scheme}] is not supported by this selection handler")
         }
         def clazz = getDomainClass(uri.host)
-        def method = uri.path
-        def query = queryAsMap(uri.query)
+        def method = uri.path?.decodeURL()
+        def query = SelectionUtils.queryAsMap(uri.query)
         switch (method) {
             case '/list':
                 return doList(clazz, query, params)
@@ -66,24 +66,6 @@ class GormSelection {
                 return doRandom(clazz, query, params)
             default:
                 throw new IllegalArgumentException("$method: unknown method")
-        }
-    }
-
-    /**
-     * Convert a query string to a Map.
-     *
-     * @param query query string i.e. "sex=female&state=CA&age=%3E40"
-     * @return the query as a Map i.e. [sex:"female", state:"CA", age:"<40]
-     */
-    private Map queryAsMap(String query) {
-        if (!query) return [:]
-
-        query.split('&').inject([:]) {map, kvp ->
-            def (key, value) = kvp.split('=').toList()
-            if (value != null) {
-                map[key] = value//URLDecoder.decode(value)
-            }
-            return map
         }
     }
 

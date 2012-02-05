@@ -21,4 +21,7 @@ log4j = {
            'net.sf.ehcache.hibernate'
 
     warn   'org.mortbay.log'
+
+    debug  'grails.app.services.grails.plugins.selection'
+    debug  'grails.app.selection'
 }

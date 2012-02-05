@@ -20,7 +20,7 @@ import grails.plugins.selection.GrailsSelectionClass
 
 class SelectionGrailsPlugin {
     // the plugin version
-    def version = "0.1"
+    def version = "0.3"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "2.0 > *"
     // the other plugins this plugin depends on
@@ -28,7 +28,8 @@ class SelectionGrailsPlugin {
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
             "grails-app/views/error.gsp",
-            "grails-app/domain/**"
+            "grails-app/domain/**",
+            "grails-app/services/grails/plugins/selection/SelectionTestService.groovy"
     ]
     def loadAfter = ['logging']
     def watchedResources = [
@@ -44,9 +45,9 @@ class SelectionGrailsPlugin {
 The selection plugin provides unified selection of information.
 It uses a URI based syntax to select any information from any resource.
 Grails plugins can add custom search providers.
-Example 1: gorm://person/list?name=Gr%
+Example 1: gorm://person/list?name=Gr%25
 Example 2: ldap:dc=my-company&dc=com&cn=users
-Example 3: bean:myService.method
+Example 3: bean://myService/method
 Example 4: http://api.my-company.com/rest/events?system=42
 '''
 

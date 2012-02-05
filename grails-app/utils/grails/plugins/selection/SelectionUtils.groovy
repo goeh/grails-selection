@@ -19,8 +19,11 @@ class SelectionUtils {
         if (!query) return [:]
 
         query.split('&').inject([:]) {map, kvp ->
-            def (key, value) = kvp.split('=').toList()
-            if (value != null) {
+            def idx = kvp.indexOf('=')
+            def key, value
+            if (idx != -1) {
+                key = kvp.substring(0, idx)
+                value = kvp.substring(idx + 1)
                 map[key] = value
             }
             return map

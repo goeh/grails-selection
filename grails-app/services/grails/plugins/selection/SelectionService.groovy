@@ -34,7 +34,11 @@ class SelectionService {
      */
     def select(query, params = [:]) {
         def uri = (query instanceof URI) ? query : new URI(query.toString())
-        getSelectionHandler(uri).select(uri, params)
+        def handler = getSelectionHandler(uri)
+        if(log.isDebugEnabled()) {
+            log.debug("${handler.class.name} selected for $uri $params")
+        }
+        handler.select(uri, params)
     }
 
     /**
