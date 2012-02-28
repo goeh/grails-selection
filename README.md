@@ -10,8 +10,15 @@ def result = selectionService.select(URI, params)
 
 - gorm://person/list?name=Gra%25
 - bean://myService/method/arg
-- http://api.example.com/rest/events?system=42
+- https://dialer.mycompany.com/outbound/next?agent=liza
 
 *LDAP support is provided by the selection-ldap plugin*
 
 - ldap:dc=example,dc=com&filter=(objectClass=people)
+
+*Persistent selections are provided by the selection-storage plugin*
+
+- http://localhost:8080/myapp/selection/453
+
+The result of invoking selectionService.selection(...) is implementation dependent,
+but the 'gorm' selection always returns one or more domain instances.

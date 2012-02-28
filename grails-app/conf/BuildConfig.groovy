@@ -33,6 +33,6 @@ grails.project.dependency.resolution = {
               ":release:1.0.1") {
             export = false
         }
-        runtime ":hibernate:$grailsVersion"
+        test(":hibernate:$grailsVersion") { export = false }
     }
 }

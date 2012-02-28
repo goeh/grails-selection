@@ -20,7 +20,7 @@ import grails.plugins.selection.GrailsSelectionClass
 
 class SelectionGrailsPlugin {
     // the plugin version
-    def version = "0.4"
+    def version = "0.5"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "2.0 > *"
     // the other plugins this plugin depends on
@@ -29,6 +29,7 @@ class SelectionGrailsPlugin {
     def pluginExcludes = [
             "grails-app/views/error.gsp",
             "grails-app/domain/**",
+            "grails-app/controllers/grails/plugins/selection/SelectionTestController.groovy",
             "grails-app/services/grails/plugins/selection/SelectionTestService.groovy"
     ]
     def loadAfter = ['logging']
@@ -78,7 +79,7 @@ Example 4: http://api.my-company.com/rest/events?system=42
     def doWithSpring = {
         // Create default criteria factory.
         selectionCriteriaFactory(grails.plugins.selection.GormCriteriaFactory)
-        
+
         // Configure selection handlers
         def selectionClasses = application.selectionClasses
         selectionClasses.each { selectionClass ->

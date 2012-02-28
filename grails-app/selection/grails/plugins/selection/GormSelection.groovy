@@ -31,13 +31,12 @@ class GormSelection {
 
     def grailsApplication
 
-    //GormCriteriaFactory criteriaFactory = new GormCriteriaFactory()
     def selectionCriteriaFactory
-    
+
     /*
      * Criteria applied to all list queries.
      * Please note that /get queries do not use the fixed criteria.
-     * Authorization and/or tenant filters must always be applied by calling code when using /get.
+     * Authorization and/or tenant filters must always be applied by clients when using /get.
      */
     Closure fixedCriteria
 
