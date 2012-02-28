@@ -50,12 +50,6 @@ class GormSelection {
     }
 
     def select(URI uri, Map params) {
-        if (uri == null) {
-            throw new IllegalArgumentException("mandatory parameter [uri] is null")
-        }
-        if (!supports(uri)) {
-            throw new IllegalArgumentException("URI scheme [${uri.scheme}] is not supported by this selection handler")
-        }
         def clazz = getDomainClass(uri.host)
         def method = uri.path?.decodeURL()
         def query = SelectionUtils.queryAsMap(uri.query)

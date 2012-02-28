@@ -20,7 +20,7 @@ import grails.plugins.selection.GrailsSelectionClass
 
 class SelectionGrailsPlugin {
     // the plugin version
-    def version = "0.5"
+    def version = "0.5.1"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "2.0 > *"
     // the other plugins this plugin depends on
@@ -49,7 +49,7 @@ Grails plugins can add custom search providers.
 Example 1: gorm://person/list?name=Gr%25
 Example 2: ldap:dc=my-company&dc=com&cn=users
 Example 3: bean://myService/method
-Example 4: http://api.my-company.com/rest/events?system=42
+Example 4: https://dialer.mycompany.com/outbound/next?agent=liza
 '''
 
     // URL to the plugin's documentation

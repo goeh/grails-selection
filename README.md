@@ -16,9 +16,9 @@ def result = selectionService.select(URI, params)
 
 - ldap:dc=example,dc=com&filter=(objectClass=people)
 
-*Persistent selections are provided by the selection-storage plugin*
+*Persistent selections are provided by the selection-repository plugin*
 
-- http://localhost:8080/myapp/selection/453
+- repo:453?offset=0&max=10&sort=lastName&order=asc
 
 The result of invoking selectionService.selection(...) is implementation dependent,
-but the 'gorm' selection always returns one or more domain instances.
+but the 'gorm' selection always returns domain instances.
