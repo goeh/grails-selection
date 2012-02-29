@@ -21,6 +21,7 @@ package grails.plugins.selection
  *
  * Examples:
  * bean://myBean/getEvents?status=1
+ * bean://anotherBean/getSomething/arg1/arg2/arg3
  * bean://erpIntegrationBean/getInvoices?date=%3E2012-01-01
  *
  * @author Goran Ehrsson
@@ -39,34 +40,60 @@ class BeanSelection {
         return uri?.scheme == 'bean'
     }
 
+    /**
+     * Invoke method on a spring bean encoded in the specified URI
+     * @param uri the encoded bean/method
+     * @param params (optional) parameters to the method invocation
+     * @return result returned by the bean method
+     */
     def select(URI uri, Map params) {
+        // Lookup the bean in application context.
         def bean = grailsApplication.mainContext.getBean(uri.host)
+
+        // path contains the method name to invoke, and optional method arguments.
         def path = uri.path?.decodeURL()
-        if(path.startsWith('/')) {
+        if (path.startsWith('/')) {
             path = path.substring(1)
         }
         if (!path) {
             throw new IllegalArgumentException("URI has no bean method (path) [$uri]")
         }
+        // If the method name is followed by one or more slashes, they are treated as positional method arguments.
         def args = path.split('/').toList()
         def method = args.remove(0)
+
+        // Query will be sent to the method as a named arguments Map.
         def query = SelectionUtils.queryAsMap(uri.query)
-        if(args.size() == 0) {
+        if (args.size() == 0) {
             args = null
-        } else if(args.size() == 1) {
+        } else if (args.size() == 1) {
             args = args[0]
         }
+
         log.debug("method=$method args=$args query=$query")
+
+        // Construct method arguments depending on supplied parameters.
+        def methodArguments = []
+        if (args) {
+            methodArguments << args
+        }
+        if (query) {
+            methodArguments << query
+        }
+        if (params != null) {
+            methodArguments << params
+        }
         def result
-        if(args && query) {
-            result = bean.invokeMethod(method, [args, query].toArray())
-        } else if(args) {
-            if(args)
-            result = bean.invokeMethod(method, args)
-        } else if(query) {
-            result = bean.invokeMethod(method, query)
-        } else {
-            result = bean."$method"()
+        switch (methodArguments.size()) {
+            case 0:
+                result = bean."$method"()
+                break
+            case 1:
+                result = bean.invokeMethod(method, methodArguments[0])
+                break
+            default:
+                result = bean.invokeMethod(method, methodArguments.toArray())
+                break
         }
         return result
     }

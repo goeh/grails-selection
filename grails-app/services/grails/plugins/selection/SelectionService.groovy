@@ -27,12 +27,12 @@ class SelectionService {
 
     /**
      * Selection data using a URI based syntax.
-     * 
+     *
      * @param query query URI, for example gorm://book/list?author=Anderson
-     * @param params parameters sent to the query handler, i.e. offset, max, sort.
+     * @param params (optional) parameters sent to the query handler, i.e. offset, max, sort.
      * @return query result could be a domain instance or a List of instances, or anything...
      */
-    def select(query, params = [:]) {
+    def select(query, params = null) {
         def uri = (query instanceof URI) ? query : new URI(query.toString())
         def handler = getSelectionHandler(uri)
         if(log.isDebugEnabled()) {

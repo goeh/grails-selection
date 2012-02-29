@@ -53,6 +53,12 @@ class GormSelection {
         def clazz = getDomainClass(uri.host)
         def method = uri.path?.decodeURL()
         def query = SelectionUtils.queryAsMap(uri.query)
+
+        // params can be null but criteria methods in the class requires a Map.
+        if(params == null) {
+            params = [:]
+        }
+
         switch (method) {
             case '/list':
                 return doList(clazz, query, params)
