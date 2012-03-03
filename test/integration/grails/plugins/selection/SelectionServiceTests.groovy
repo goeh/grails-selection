@@ -49,6 +49,34 @@ class SelectionServiceTests extends GroovyTestCase {
         assert query.action == null
     }
 
+    void testParameterMapQueryExclude() {
+        def values = [id: 1, uri: "gorm://testEntity/list".encodeAsURL(), offset: 0, max: 10, controller: "integration", action: "test", name: "Foo", idx: 42]
+        def params = new GrailsParameterMap(values, null)
+
+        // Change parameter name to 'uri
+        grailsApplication.config.selection.uri.parameter = 'uri'
+
+        // Now 'uri' should be excluded instead of 'id'.
+        def query = params.getSelectionQuery()
+        assert query.size() == 3
+        assert query.id == 1
+        assert query.idx == 42
+        assert query.name == "Foo"
+        assert query.uri == null
+        assert query.offset == null
+        assert query.max == null
+        assert query.controller == null
+        assert query.action == null
+
+        // Let's exclude 'idx' for this call.
+        query = params.getSelectionQuery(['idx'])
+        assert query.size() == 2
+        assert query.id == 1
+        assert query.name == "Foo"
+        assert query.idx == null
+        assert query.uri == null
+    }
+
     void testParameterMapURI() {
         def values = [id: "gorm://testEntity/list?name=Foo"]
         def params = new GrailsParameterMap(values, null)
@@ -101,5 +129,11 @@ class SelectionServiceTests extends GroovyTestCase {
         // It's found with the name 'uri'
         params = new GrailsParameterMap([uri: uri], null)
         assert params.getSelectionURI() != null
+
+        // Override the configured name for this statement
+        params = new GrailsParameterMap([foo: uri], null)
+        assert params.getSelectionURI() == null
+        assert params.getSelectionURI('foo') != null
+
     }
 }
