@@ -14,13 +14,15 @@
  *  limitations under the License.
  *  under the License.
  */
+
 import grails.spring.BeanBuilder
 import grails.plugins.selection.SelectionArtefactHandler
 import grails.plugins.selection.GrailsSelectionClass
+import org.codehaus.groovy.grails.web.servlet.mvc.GrailsParameterMap
 
 class SelectionGrailsPlugin {
     // the plugin version
-    def version = "0.5.3"
+    def version = "0.5.4"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "2.0 > *"
     // the other plugins this plugin depends on
@@ -90,7 +92,31 @@ Example 4: https://dialer.mycompany.com/outbound/next?agent=liza
     }
 
     def doWithDynamicMethods = { ctx ->
-        // TODO Implement registering dynamic methods to classes (optional)
+        // Add convenient methods to controller params
+        def mc = GrailsParameterMap.metaClass
+        // Get all query values by filtering out known non-query values.
+        mc.getSelectionQuery = { List excludes = [] ->
+            def excludeList = ['id', 'offset', 'max', 'sort', 'order', 'action', 'controller'] + excludes
+            delegate.findAll {key, value ->
+                value && !excludeList.contains(key)
+            }
+        }
+        // Create a URI from
+        mc.getSelectionURI = {String idProperty = 'id' ->
+            String uri = delegate[idProperty]
+            switch (application.config.selection.uri.encoding.toString().toLowerCase()) {
+                case 'base64':
+                    uri = new String(uri.decodeBase64())
+                    break
+                case 'hex':
+                    uri = new String(uri.decodeHex())
+                    break
+                case 'url':
+                    uri = uri.decodeURL()
+                    break
+            }
+            new URI(uri)
+        }
     }
 
     def doWithApplicationContext = { applicationContext ->
