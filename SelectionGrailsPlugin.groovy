@@ -102,20 +102,26 @@ Example 4: https://dialer.mycompany.com/outbound/next?agent=liza
             }
         }
         // Create a URI from
-        mc.getSelectionURI = {String idProperty = 'id' ->
-            String uri = delegate[idProperty]
-            switch (application.config.selection.uri.encoding.toString().toLowerCase()) {
-                case 'base64':
-                    uri = new String(uri.decodeBase64())
-                    break
-                case 'hex':
-                    uri = new String(uri.decodeHex())
-                    break
-                case 'url':
-                    uri = uri.decodeURL()
-                    break
+        mc.getSelectionURI = {String uriParameterName = null ->
+            if (uriParameterName == null) {
+                uriParameterName = application.config.selection.uri.parameter ?: 'id'
             }
-            new URI(uri)
+            String uri = delegate[uriParameterName]
+            if (uri) {
+                switch (application.config.selection.uri.encoding.toString().toLowerCase()) {
+                    case 'base64':
+                        uri = new String(uri.decodeBase64())
+                        break
+                    case 'hex':
+                        uri = new String(uri.decodeHex())
+                        break
+                    case 'url':
+                        uri = uri.decodeURL()
+                        break
+                }
+                return new URI(uri)
+            }
+            return null
         }
     }
 

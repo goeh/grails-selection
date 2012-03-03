@@ -10,6 +10,13 @@ class SelectionServiceTests extends GroovyTestCase {
     def selectionService
     def grailsApplication
 
+    protected void setUp() {
+        super.setUp()
+
+        grailsApplication.config.selection.uri.encoding = null
+        grailsApplication.config.selection.uri.parameter = null
+    }
+
     void testAddQuery() {
         assert selectionService.addQuery(new URI("gorm://testEntity/list"), [name: 'Joe']).query == 'name=Joe'
         assert selectionService.addQuery(new URI("gorm://testEntity/list?"), [name: 'Joe']).query == 'name=Joe'
@@ -76,5 +83,23 @@ class SelectionServiceTests extends GroovyTestCase {
         def uri = params.getSelectionURI()
         assert uri.toString() == "gorm://testEntity/list?name=Foo"
         assert uri.query == 'name=Foo'
+    }
+
+    void testParameterMapURIName() {
+        def uri = "gorm://testEntity/list".encodeAsURL()
+        // 'id' is the default URI parameter name
+        def params = new GrailsParameterMap([id: uri], null)
+        assert params.getSelectionURI() != null
+
+        // Change parameter name to 'uri
+        grailsApplication.config.selection.uri.parameter = 'uri'
+
+        // Not found using default parameter name anymore
+        params = new GrailsParameterMap([id: uri], null)
+        assert params.getSelectionURI() == null
+
+        // It's found with the name 'uri'
+        params = new GrailsParameterMap([uri: uri], null)
+        assert params.getSelectionURI() != null
     }
 }
