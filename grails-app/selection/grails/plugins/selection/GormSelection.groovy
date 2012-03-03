@@ -16,6 +16,8 @@
  */
 package grails.plugins.selection
 
+import org.codehaus.groovy.grails.web.util.WebUtils
+
 /**
  * A selection handler that support standard GORM list() and get() queries.
  *
@@ -52,8 +54,7 @@ class GormSelection {
     def select(URI uri, Map params) {
         def clazz = getDomainClass(uri.host)
         def method = uri.path?.decodeURL()
-        def query = SelectionUtils.queryAsMap(uri.query)
-
+        def query = uri.rawQuery ? WebUtils.fromQueryString(uri.rawQuery) : [:]
         // params can be null but criteria methods in the class requires a Map.
         if(params == null) {
             params = [:]

@@ -16,6 +16,8 @@
  */
 package grails.plugins.selection
 
+import org.codehaus.groovy.grails.web.util.WebUtils
+
 /**
  * A selection handler that call methods on Spring Beans.
  *
@@ -62,13 +64,14 @@ class BeanSelection {
         def args = path.split('/').toList()
         def method = args.remove(0)
 
-        // Query will be sent to the method as a named arguments Map.
-        def query = SelectionUtils.queryAsMap(uri.query)
         if (args.size() == 0) {
             args = null
         } else if (args.size() == 1) {
             args = args[0]
         }
+
+        // Query will be sent to the method as a named arguments Map.
+        def query = uri.rawQuery ? WebUtils.fromQueryString(uri.rawQuery) : [:]
 
         log.debug("method=$method args=$args query=$query")
 

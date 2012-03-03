@@ -5,7 +5,7 @@ import test.TestEntity
 /**
  * Test the ProxySelection class.
  */
-class ProxySelectionTests {
+class ProxySelectionTests extends GroovyTestCase {
 
     def selectionService
 
@@ -19,10 +19,7 @@ class ProxySelectionTests {
         def file = File.createTempFile("grails-", ".sel")
         file.deleteOnExit()
         file << "gorm://testEntity/list?name=Fo"
-        def uri = file.toURI()
-        println "file uri=$uri"
-
-        def result = selectionService.select(uri)
+        def result = selectionService.select(file.toURI())
 
         file.delete()
 

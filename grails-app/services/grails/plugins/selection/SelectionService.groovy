@@ -16,6 +16,8 @@
  */
 package grails.plugins.selection
 
+import org.codehaus.groovy.grails.web.util.WebUtils
+
 /**
  * Main user facing service for the selection framework.
  */
@@ -35,7 +37,7 @@ class SelectionService {
     def select(query, params = null) {
         def uri = (query instanceof URI) ? query : new URI(query.toString())
         def handler = getSelectionHandler(uri)
-        if(log.isDebugEnabled()) {
+        if (log.isDebugEnabled()) {
             log.debug("${handler.class.name} selected for $uri $params")
         }
         handler.select(uri, params)
@@ -49,11 +51,32 @@ class SelectionService {
      * @throws IllegalArgumentException if no handler was found
      */
     def getSelectionHandler(URI uri) {
-        for(GrailsSelectionClass clazz in grailsApplication.selectionClasses) {
-            if(clazz.supports(uri)) {
+        for (GrailsSelectionClass clazz in grailsApplication.selectionClasses) {
+            if (clazz.supports(uri)) {
                 return grailsApplication.mainContext.getBean(clazz.propertyName)
             }
         }
         throw new IllegalArgumentException("No selection provider found for URI [$uri]. Installed providers ${grailsApplication.selectionClasses*.propertyName}")
+    }
+
+    /**
+     * Append query to a URI with values from a Map.
+     * @param uri the base URI, existing query will be preserved
+     * @param query key/value pairs to be appended to the URI query
+     * @return a new URI instance with query appended
+     */
+    URI addQuery(URI uri, Map query) {
+        def tmp = uri.toString()
+        def queryString = WebUtils.toQueryString(query).substring(1) // Remove the leading '?'
+        if (queryString) {
+            if (tmp.indexOf('?') > -1) {
+                if (tmp[-1] != '?') {
+                    tmp += '&' // Append our query to the existing query.
+                }
+            } else {
+                tmp += '?' // No existing query, our query will be the complete query.
+            }
+        }
+        new URI(tmp + queryString)
     }
 }

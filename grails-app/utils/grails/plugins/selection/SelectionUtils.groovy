@@ -1,5 +1,7 @@
 package grails.plugins.selection
 
+import org.codehaus.groovy.grails.web.util.WebUtils
+
 /**
  * Utility methods for the selection framework.
  *
@@ -16,17 +18,6 @@ class SelectionUtils {
      * @return the query as a Map i.e. [sex:"female", state:"CA", age:"<40]
      */
     static Map queryAsMap(String query) {
-        if (!query) return [:]
-
-        query.split('&').inject([:]) {map, kvp ->
-            def idx = kvp.indexOf('=')
-            def key, value
-            if (idx != -1) {
-                key = kvp.substring(0, idx)
-                value = kvp.substring(idx + 1)
-                map[key] = value
-            }
-            return map
-        }
+        query ? WebUtils.fromQueryString(query) : [:]
     }
 }
