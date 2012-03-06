@@ -22,7 +22,7 @@ import org.codehaus.groovy.grails.web.servlet.mvc.GrailsParameterMap
 
 class SelectionGrailsPlugin {
     // the plugin version
-    def version = "0.5.5"
+    def version = "0.5.7"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "2.0 > *"
     // the other plugins this plugin depends on
@@ -99,7 +99,7 @@ Example 4: https://dialer.mycompany.com/outbound/next?agent=liza
             def uriParameterName = application.config.selection.uri.parameter ?: 'id'
             def excludeList = [uriParameterName, 'offset', 'max', 'sort', 'order', 'action', 'controller'] + excludes
             delegate.findAll {key, value ->
-                value && !excludeList.contains(key)
+                value && !key.startsWith('_') && !excludeList.contains(key)
             }
         }
         // Create a URI from
@@ -110,13 +110,15 @@ Example 4: https://dialer.mycompany.com/outbound/next?agent=liza
             String uri = delegate[uriParameterName]
             if (uri) {
                 switch (application.config.selection.uri.encoding.toString().toLowerCase()) {
+                    case 'none':
+                        break
                     case 'base64':
                         uri = new String(uri.decodeBase64())
                         break
                     case 'hex':
                         uri = new String(uri.decodeHex())
                         break
-                    case 'url':
+                    default:
                         uri = uri.decodeURL()
                         break
                 }

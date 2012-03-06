@@ -49,6 +49,16 @@ class SelectionServiceTests extends GroovyTestCase {
         assert query.action == null
     }
 
+    void testParameterMapUnderscore() {
+        def values = [foo: 42, _bar: 'hello', bar: 'hello', _msg: 'world']
+        def params = new GrailsParameterMap(values, null)
+        def query = params.getSelectionQuery()
+        assert query.foo == 42
+        assert query.bar == 'hello'
+        assert query._bar == null
+        assert query._msg == null
+    }
+
     void testParameterMapQueryExclude() {
         def values = [id: 1, uri: "gorm://testEntity/list".encodeAsURL(), offset: 0, max: 10, controller: "integration", action: "test", name: "Foo", idx: 42]
         def params = new GrailsParameterMap(values, null)
