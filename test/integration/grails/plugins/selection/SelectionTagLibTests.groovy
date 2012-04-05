@@ -70,4 +70,14 @@ class SelectionTagLibTests extends GroovyPagesTestCase {
         def template = '<selection:createLink controller="testEntity" action="list" selection="\${uri}"/>'
         assert applyTemplate(template, [uri: uri]) == '/testEntity/list?q=Z29ybTovL3Rlc3RFbnRpdHkvbGlzdD9uYW1lPUEq'
     }
+
+    void testEncode() {
+
+        // Initialize a known config.
+        grailsApplication.config.selection.uri.encoding = 'base64'
+
+        def uri = new URI("gorm://testEntity/list?name=A*")
+        def template = '<selection:encode selection="\${uri}"/>'
+        assert applyTemplate(template, [uri: uri]) == "Z29ybTovL3Rlc3RFbnRpdHkvbGlzdD9uYW1lPUEq"
+    }
 }

@@ -11,7 +11,7 @@ class SelectionTagLib {
     def selectionService
 
     /**
-     * Create a link that includes a selection URI with encoding specified in Config.groovy.
+     * Create a link that includes a selection URI with encoding specified in Config.groovy [selection.uri.encoding].
      * @attr REQUIRED selection the selection uri to include in the link
      * @attr parameter parameter name, if omitted config option 'selection.uri.parameter' or 'id' is used.
      */
@@ -23,7 +23,7 @@ class SelectionTagLib {
     }
 
     /**
-     * Create a URI that includes a selection URI with encoding specified in Config.groovy.
+     * Create a URI that includes a selection URI with encoding specified in Config.groovy [selection.uri.encoding].
      * @attr REQUIRED selection the selection uri to include
      * @attr parameter parameter name, if omitted config option 'selection.uri.parameter' or 'id' is used.
      */
@@ -32,6 +32,20 @@ class SelectionTagLib {
             throwTagError("Tag [createLink] is missing required attribute [selection]")
         }
         out << g.createLink(createLinkParams(attrs))
+    }
+
+    /**
+     * Encode selection URI with encoding specified in Config.groovy [selection.uri.encoding].
+     */
+    def encode = {attrs->
+        def uri = attrs.selection
+        if (!uri) {
+            throwTagError("Tag [encode] is missing required attribute [selection]")
+        }
+        if(! (uri instanceof URI)) {
+            uri = new URI(uri.toString())
+        }
+        out << selectionService.encodeSelection(uri)
     }
 
     private Map createLinkParams(Map attrs) {
