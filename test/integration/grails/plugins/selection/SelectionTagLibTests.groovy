@@ -11,7 +11,7 @@ class SelectionTagLibTests extends GroovyPagesTestCase {
 
     void testMissingParameter() {
         shouldFail {
-            def template = '<selection:link controller="testEntity" action="list">Test</selection:link>'
+            def template = '<s:link controller="testEntity" action="list">Test</s:link>'
             applyTemplate(template)
         }
     }
@@ -23,7 +23,7 @@ class SelectionTagLibTests extends GroovyPagesTestCase {
         grailsApplication.config.selection.uri.parameter = 'id'
 
         def uri = new URI("gorm://testEntity/list?name=A*")
-        def template = '<selection:link controller="testEntity" action="list" selection="\${uri}">Test</selection:link>'
+        def template = '<s:link controller="testEntity" action="list" selection="\${uri}">Test</s:link>'
         assert applyTemplate(template, [uri: uri]) == '<a href="/testEntity/list/gorm%3A%2F%2FtestEntity%2Flist%3Fname%3DA*">Test</a>'
     }
 
@@ -34,7 +34,7 @@ class SelectionTagLibTests extends GroovyPagesTestCase {
         grailsApplication.config.selection.uri.parameter = 'id'
 
         def uri = new URI("gorm://testEntity/list?name=A*")
-        def template = '<selection:link controller="testEntity" action="list" selection="\${uri}">Test</selection:link>'
+        def template = '<s:link controller="testEntity" action="list" selection="\${uri}">Test</s:link>'
         assert applyTemplate(template, [uri: uri]) == '<a href="/testEntity/list/Z29ybTovL3Rlc3RFbnRpdHkvbGlzdD9uYW1lPUEq">Test</a>'
     }
 
@@ -45,7 +45,7 @@ class SelectionTagLibTests extends GroovyPagesTestCase {
         grailsApplication.config.selection.uri.parameter = 'id'
 
         def uri = new URI("gorm://testEntity/list?name=A*")
-        def template = '<selection:link controller="testEntity" action="list" selection="\${uri}">Test</selection:link>'
+        def template = '<s:link controller="testEntity" action="list" selection="\${uri}">Test</s:link>'
         assert applyTemplate(template, [uri: uri]) == '<a href="/testEntity/list/676f726d3a2f2f74657374456e746974792f6c6973743f6e616d653d412a">Test</a>'
     }
 
@@ -56,7 +56,7 @@ class SelectionTagLibTests extends GroovyPagesTestCase {
         grailsApplication.config.selection.uri.parameter = 'q'
 
         def uri = new URI("gorm://testEntity/list?name=A*")
-        def template = '<selection:link controller="testEntity" action="list" selection="\${uri}">Test</selection:link>'
+        def template = '<s:link controller="testEntity" action="list" selection="\${uri}">Test</s:link>'
         assert applyTemplate(template, [uri: uri]) == '<a href="/testEntity/list?q=Z29ybTovL3Rlc3RFbnRpdHkvbGlzdD9uYW1lPUEq">Test</a>'
     }
 
@@ -67,7 +67,7 @@ class SelectionTagLibTests extends GroovyPagesTestCase {
         grailsApplication.config.selection.uri.parameter = 'q'
 
         def uri = new URI("gorm://testEntity/list?name=A*")
-        def template = '<selection:createLink controller="testEntity" action="list" selection="\${uri}"/>'
+        def template = '<s:createLink controller="testEntity" action="list" selection="\${uri}"/>'
         assert applyTemplate(template, [uri: uri]) == '/testEntity/list?q=Z29ybTovL3Rlc3RFbnRpdHkvbGlzdD9uYW1lPUEq'
     }
 
@@ -77,7 +77,7 @@ class SelectionTagLibTests extends GroovyPagesTestCase {
         grailsApplication.config.selection.uri.encoding = 'base64'
 
         def uri = new URI("gorm://testEntity/list?name=A*")
-        def template = '<selection:encode selection="\${uri}"/>'
+        def template = '<s:encode selection="\${uri}"/>'
         assert applyTemplate(template, [uri: uri]) == "Z29ybTovL3Rlc3RFbnRpdHkvbGlzdD9uYW1lPUEq"
     }
 }
