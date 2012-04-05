@@ -79,4 +79,47 @@ class SelectionService {
         }
         new URI(tmp + queryString)
     }
+
+    /**
+     * Encode selection URI with the encoding specified in Config.groovy [selection.uri.encoding]
+     * @param uri the selection URI to encode
+     * @return the encoded selection (typically base64, hex or url encoded)
+     */
+    String encodeSelection(URI uri) {
+        switch (grailsApplication.config.selection.uri.encoding.toString().toLowerCase()) {
+            case 'none':
+                return uri.toString()
+            case 'base64':
+                return uri.toString().encodeAsBase64()
+            case 'hex':
+                return uri.toString().encodeAsHex()
+            default:
+                return uri.toString().encodeAsURL()
+        }
+    }
+
+    /**
+     * Decode selection String with the encoding specified in Config.groovy [selection.uri.encoding]
+     * @param uri the selection string to decode
+     * @return the decoded selection URI
+     */
+    URI decodeSelection(String uri) {
+        if (uri) {
+            switch (grailsApplication.config.selection.uri.encoding.toString().toLowerCase()) {
+                case 'none':
+                    break
+                case 'base64':
+                    uri = new String(uri.decodeBase64())
+                    break
+                case 'hex':
+                    uri = new String(uri.decodeHex())
+                    break
+                default:
+                    uri = uri.decodeURL()
+                    break
+            }
+            return new URI(uri)
+        }
+        return null
+    }
 }

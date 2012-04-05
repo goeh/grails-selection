@@ -146,4 +146,11 @@ class SelectionServiceTests extends GroovyTestCase {
         assert params.getSelectionURI('foo') != null
 
     }
+
+    void testEncodeDecodeSelection() {
+        def uri = new URI("gorm://testEntity/list?name=Foo")
+        def encoded = selectionService.encodeSelection(uri)
+        def decoded = selectionService.decodeSelection(encoded)
+        assert decoded == uri
+    }
 }
