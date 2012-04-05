@@ -16,26 +16,43 @@ class SelectionTagLib {
      * @attr parameter parameter name, if omitted config option 'selection.uri.parameter' or 'id' is used.
      */
     def link = {attrs, body ->
-
-        def uri = attrs.remove('selection')
-        if (!uri) {
+        if (!attrs.selection) {
             throwTagError("Tag [link] is missing required attribute [selection]")
         }
-        def uriParameterName = attrs.remove('parameter')
+        out << g.link(createLinkParams(attrs), body)
+    }
+
+    /**
+     * Create a URI that includes a selection URI with encoding specified in Config.groovy.
+     * @attr REQUIRED selection the selection uri to include
+     * @attr parameter parameter name, if omitted config option 'selection.uri.parameter' or 'id' is used.
+     */
+    def createLink = {attrs ->
+        if (!attrs.selection) {
+            throwTagError("Tag [createLink] is missing required attribute [selection]")
+        }
+        out << g.createLink(createLinkParams(attrs))
+    }
+
+    private Map createLinkParams(Map attrs) {
+        def linkParams = [:]
+        linkParams.putAll(attrs)
+        def uri = linkParams.remove('selection')
+        def uriParameterName = linkParams.remove('parameter')
         if (uriParameterName == null) {
             uriParameterName = grailsApplication.config.selection.uri.parameter ?: 'id'
         }
         def value = selectionService.encodeSelection(uri)
-        def params = attrs.params
-        if(! params) {
-            params = attrs.params = [:]
+        def params = linkParams.params
+        if (!params) {
+            params = linkParams.params = [:]
         }
-        def id = attrs.remove('id')
-        if(id != null) {
+        def id = linkParams.remove('id')
+        if (id != null) {
             params.id = id
         }
         params[uriParameterName] = value
 
-        out << g.link(attrs, body)
+        return linkParams
     }
 }
