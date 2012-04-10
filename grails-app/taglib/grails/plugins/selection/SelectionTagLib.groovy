@@ -5,7 +5,7 @@ package grails.plugins.selection
  */
 class SelectionTagLib {
 
-    static namespace = "s"
+    static namespace = "select"
 
     def grailsApplication
     def selectionService
