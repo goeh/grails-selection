@@ -49,6 +49,41 @@ class SelectionServiceTests extends GroovyTestCase {
         assert query.action == null
     }
 
+    void testParameterMapListValues() {
+        def values = [single: 42, multiple: ['43', '44', '45'].toArray(new String[3])]
+        def params = new GrailsParameterMap(values, null)
+        def query = params.getSelectionQuery()
+        assert query.single == 42
+        assert (query.multiple instanceof String[])
+        assert !query.multiple.contains('42')
+        assert query.multiple.contains('43')
+        assert query.multiple.contains('44')
+        assert query.multiple.contains('45')
+    }
+
+    void testParameterMapWithListHint() {
+        def values = [single: '42', multiple: ['43', '44', '45'].toArray(new String[3])]
+        def params = new GrailsParameterMap(values, null)
+        def query = params.getSelectionQuery(collection:['multiple'])
+        assert query.single == '42'
+        assert (query.multiple instanceof List)
+        assert !query.multiple.contains('42')
+        assert query.multiple.contains('43')
+        assert query.multiple.contains('44')
+        assert query.multiple.contains('45')
+    }
+
+    void testParameterMapWithListHintSingle() {
+        def values = [single: '42', multiple: '43']
+        def params = new GrailsParameterMap(values, null)
+        def query = params.getSelectionQuery(collection:['multiple'])
+        assert (query.single instanceof String)
+        assert query.single == '42'
+        assert (query.multiple instanceof List)
+        assert !query.multiple.contains('42')
+        assert query.multiple.contains('43')
+    }
+
     void testParameterMapUnderscore() {
         def values = [foo: 42, _bar: 'hello', bar: 'hello', _msg: 'world']
         def params = new GrailsParameterMap(values, null)
@@ -79,7 +114,7 @@ class SelectionServiceTests extends GroovyTestCase {
         assert query.action == null
 
         // Let's exclude 'idx' for this call.
-        query = params.getSelectionQuery(['idx'])
+        query = params.getSelectionQuery(exclude:['idx'])
         assert query.size() == 2
         assert query.id == 1
         assert query.name == "Foo"

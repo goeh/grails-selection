@@ -22,7 +22,7 @@ import org.codehaus.groovy.grails.web.servlet.mvc.GrailsParameterMap
 
 class SelectionGrailsPlugin {
     // the plugin version
-    def version = "0.6.3"
+    def version = "0.7"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "2.0 > *"
     // the other plugins this plugin depends on
@@ -95,12 +95,21 @@ Example 4: https://dialer.mycompany.com/outbound/next?agent=liza
         // Add convenient methods to controller params
         def mc = GrailsParameterMap.metaClass
         // Get all query values by filtering out known non-query values.
-        mc.getSelectionQuery = { List excludes = [] ->
+        mc.getSelectionQuery = { Map opts = [:] ->
             def uriParameterName = application.config.selection.uri.parameter ?: 'id'
-            def excludeList = [uriParameterName, 'offset', 'max', 'sort', 'order', 'action', 'controller'] + excludes
-            delegate.findAll {key, value ->
-                value && !key.startsWith('_') && !excludeList.contains(key)
+            def excludeList = [uriParameterName, 'offset', 'max', 'sort', 'order', 'action', 'controller']
+            if(opts.exclude) {
+                excludeList.addAll(opts.exclude)
             }
+            def collection = opts.collection
+            def self = delegate
+            def rval = [:]
+            delegate.each {key, value ->
+                if (value && !key.startsWith('_') && !excludeList.contains(key)) {
+                    rval[key] = collection?.contains(key) ? self.list(key) : value
+                }
+            }
+            return rval
         }
         // Create a URI from
         mc.getSelectionURI = {String uriParameterName = null ->
