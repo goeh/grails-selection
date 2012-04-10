@@ -16,7 +16,7 @@
  */
 package grails.plugins.selection
 
-import org.codehaus.groovy.grails.web.util.WebUtils
+//import org.codehaus.groovy.grails.web.util.WebUtils
 
 /**
  * Main user facing service for the selection framework.
@@ -67,7 +67,7 @@ class SelectionService {
      */
     URI addQuery(URI uri, Map query) {
         def tmp = uri.toString()
-        def queryString = WebUtils.toQueryString(query).substring(1) // Remove the leading '?'
+        def queryString = SelectionUtils.toQueryString(query).substring(1) // Remove the leading '?'
         if (queryString) {
             if (tmp.indexOf('?') > -1) {
                 if (tmp[-1] != '?') {

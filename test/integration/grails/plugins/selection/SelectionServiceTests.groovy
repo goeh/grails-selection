@@ -21,8 +21,12 @@ class SelectionServiceTests extends GroovyTestCase {
         assert selectionService.addQuery(new URI("gorm://testEntity/list"), [name: 'Joe']).query == 'name=Joe'
         assert selectionService.addQuery(new URI("gorm://testEntity/list?"), [name: 'Joe']).query == 'name=Joe'
         assert selectionService.addQuery(new URI("gorm://testEntity/list?name=Joe"), [:]).query == 'name=Joe'
-        assert selectionService.addQuery(new URI("gorm://testEntity/list?name=Joe"), [age: 40]).query == 'name=Joe&age=40'
-        assert selectionService.addQuery(new URI("gorm://testEntity/list?name=Joe+Adams"), [age: 40]).query == 'name=Joe+Adams&age=40'
+        assert selectionService.addQuery(new URI("gorm://testEntity/list?name=Joe"), [age: '40']).query == 'name=Joe&age=40'
+        assert selectionService.addQuery(new URI("gorm://testEntity/list?name=Joe+Adams"), [age: '40']).query == 'name=Joe+Adams&age=40'
+    }
+
+    void testAddQueryWithListParameter() {
+        assert selectionService.addQuery(new URI("gorm://testEntity/list"), [name: 'Joe', age: ['40', '50']]).query == 'name=Joe&age=40&age=50'
     }
 
     void testParameterMapQuery() {
@@ -64,7 +68,7 @@ class SelectionServiceTests extends GroovyTestCase {
     void testParameterMapWithListHint() {
         def values = [single: '42', multiple: ['43', '44', '45'].toArray(new String[3])]
         def params = new GrailsParameterMap(values, null)
-        def query = params.getSelectionQuery(collection:['multiple'])
+        def query = params.getSelectionQuery(collection: ['multiple'])
         assert query.single == '42'
         assert (query.multiple instanceof List)
         assert !query.multiple.contains('42')
@@ -76,7 +80,7 @@ class SelectionServiceTests extends GroovyTestCase {
     void testParameterMapWithListHintSingle() {
         def values = [single: '42', multiple: '43']
         def params = new GrailsParameterMap(values, null)
-        def query = params.getSelectionQuery(collection:['multiple'])
+        def query = params.getSelectionQuery(collection: ['multiple'])
         assert (query.single instanceof String)
         assert query.single == '42'
         assert (query.multiple instanceof List)
@@ -114,7 +118,7 @@ class SelectionServiceTests extends GroovyTestCase {
         assert query.action == null
 
         // Let's exclude 'idx' for this call.
-        query = params.getSelectionQuery(exclude:['idx'])
+        query = params.getSelectionQuery(exclude: ['idx'])
         assert query.size() == 2
         assert query.id == 1
         assert query.name == "Foo"
