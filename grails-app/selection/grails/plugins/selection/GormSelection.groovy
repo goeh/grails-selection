@@ -167,7 +167,7 @@ class GormSelection {
             crit.call(query, params)
         }
         if (nbr > ids.size()) {
-            log.warning("Requested $nbr records but total size is ${ids.size()}, returning ${ids.size()} records")
+            log.warn("Requested $nbr records but total size is ${ids.size()}, returning ${ids.size()} records")
             nbr = ids.size()
         }
         def random = new Random(System.currentTimeMillis())
