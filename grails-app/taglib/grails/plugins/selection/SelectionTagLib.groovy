@@ -37,12 +37,12 @@ class SelectionTagLib {
     /**
      * Encode selection URI with encoding specified in Config.groovy [selection.uri.encoding].
      */
-    def encode = {attrs->
+    def encode = {attrs ->
         def uri = attrs.selection
         if (!uri) {
             throwTagError("Tag [encode] is missing required attribute [selection]")
         }
-        if(! (uri instanceof URI)) {
+        if (!(uri instanceof URI)) {
             uri = new URI(uri.toString())
         }
         out << selectionService.encodeSelection(uri)
@@ -52,21 +52,17 @@ class SelectionTagLib {
         def linkParams = [:]
         linkParams.putAll(attrs)
         def uri = linkParams.remove('selection')
-        def uriParameterName = linkParams.remove('parameter')
-        if (uriParameterName == null) {
-            uriParameterName = grailsApplication.config.selection.uri.parameter ?: 'id'
+        if (uri) {
+            def params = linkParams.params
+            if (!params) {
+                params = linkParams.params = [:]
+            }
+            def id = linkParams.remove('id')
+            if (id != null) {
+                params.id = id
+            }
+            params.putAll(selectionService.createSelectionParameters(uri, linkParams.remove('parameter')))
         }
-        def value = selectionService.encodeSelection(uri)
-        def params = linkParams.params
-        if (!params) {
-            params = linkParams.params = [:]
-        }
-        def id = linkParams.remove('id')
-        if (id != null) {
-            params.id = id
-        }
-        params[uriParameterName] = value
-
         return linkParams
     }
 }

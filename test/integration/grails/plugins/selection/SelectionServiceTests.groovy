@@ -192,4 +192,17 @@ class SelectionServiceTests extends GroovyTestCase {
         def decoded = selectionService.decodeSelection(encoded)
         assert decoded == uri
     }
+
+    void testSelectionParams() {
+        // Initialize a known config.
+        grailsApplication.config.selection.uri.encoding = 'base64'
+        grailsApplication.config.selection.uri.parameter = 'q'
+
+        def uri = new URI("gorm://testEntity/list?name=A*")
+        def params = selectionService.createSelectionParameters(uri)
+
+        println "$params"
+        assert params.q != null
+
+    }
 }

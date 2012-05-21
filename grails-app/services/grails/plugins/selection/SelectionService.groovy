@@ -122,4 +122,14 @@ class SelectionService {
         }
         return null
     }
+
+    Map createSelectionParameters(URI selection, String uriParameterName = null) {
+        def result = [:]
+        if (uriParameterName == null) {
+            uriParameterName = grailsApplication.config.selection.uri.parameter ?: 'id'
+        }
+        result[uriParameterName] = encodeSelection(selection)
+
+        return result
+    }
 }
