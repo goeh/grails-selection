@@ -24,14 +24,17 @@ class SelectionTagLib {
 
     /**
      * Create a URI that includes a selection URI with encoding specified in Config.groovy [selection.uri.encoding].
-     * @attr REQUIRED selection the selection uri to include
+     * @attr selection the selection uri to include
      * @attr parameter parameter name, if omitted config option 'selection.uri.parameter' or 'id' is used.
      */
     def createLink = {attrs ->
-        if (!attrs.selection) {
-            throwTagError("Tag [createLink] is missing required attribute [selection]")
+        def uri = g.createLink(createLinkParams(attrs))
+        out << uri
+        if(! attrs.selection) {
+            out << (new URI(uri.toString()).query ? '&' : '?')
+            out << grailsApplication.config.selection.uri.parameter ?: 'q'
+            out << '='
         }
-        out << g.createLink(createLinkParams(attrs))
     }
 
     /**
