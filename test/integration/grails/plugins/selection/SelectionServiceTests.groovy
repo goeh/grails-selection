@@ -205,4 +205,18 @@ class SelectionServiceTests extends GroovyTestCase {
         assert params.q != null
 
     }
+
+    void testEnhancedURI() {
+        // Initialize a known config.
+        grailsApplication.config.selection.uri.encoding = 'url'
+        grailsApplication.config.selection.uri.parameter = 'q'
+
+        def uri1 = new URI("gorm://testEntity/list?name=A*")
+        def map = uri1.selectionMap
+        def encoded = map.q
+        assert encoded == "gorm%3A%2F%2FtestEntity%2Flist%3Fname%3DA*"
+
+        def uri2 = new URI(encoded.decodeURL())
+        assert uri1 == uri2
+    }
 }

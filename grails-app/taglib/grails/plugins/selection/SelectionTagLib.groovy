@@ -31,7 +31,7 @@ class SelectionTagLib {
         def uri = g.createLink(createLinkParams(attrs))
         out << uri
         if(! attrs.selection) {
-            out << (new URI(uri.toString()).query ? '&' : '?')
+            out << (new URI(uri.toString()).query ? '&' : '?') // TODO Is uri.toString() correct here? encoding???
             out << grailsApplication.config.selection.uri.parameter ?: 'q'
             out << '='
         }

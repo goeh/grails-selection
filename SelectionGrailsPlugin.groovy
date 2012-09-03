@@ -22,7 +22,7 @@ import org.codehaus.groovy.grails.web.servlet.mvc.GrailsParameterMap
 
 class SelectionGrailsPlugin {
     // the plugin version
-    def version = "0.7.5"
+    def version = "0.8.0"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "2.0 > *"
     // the other plugins this plugin depends on
@@ -92,13 +92,24 @@ Example 4: https://dialer.mycompany.com/outbound/next?agent=liza
     }
 
     def doWithDynamicMethods = { ctx ->
+
+        // Enhance URI class.
+        URI.class.metaClass.encodeAsSelection = {
+            ctx.getBean('selectionService').encodeSelection(delegate)
+        }
+        URI.class.metaClass.getSelectionMap = {
+            def uriParameterName = application.config.selection.uri.parameter ?: 'id'
+            def s = ctx.getBean('selectionService').encodeSelection(delegate)
+            return [(uriParameterName): s]
+        }
+
         // Add convenient methods to controller params
         def mc = GrailsParameterMap.metaClass
         // Get all query values by filtering out known non-query values.
         mc.getSelectionQuery = { Map opts = [:] ->
             def uriParameterName = application.config.selection.uri.parameter ?: 'id'
             def excludeList = [uriParameterName, 'offset', 'max', 'sort', 'order', 'action', 'controller']
-            if(opts.exclude) {
+            if (opts.exclude) {
                 excludeList.addAll(opts.exclude)
             }
             def collection = opts.collection
@@ -169,15 +180,6 @@ Example 4: https://dialer.mycompany.com/outbound/next?agent=liza
             }
             bb.registerBeans(context)
         }
-    }
-
-    def onConfigChange = { event ->
-        // TODO Implement code that is executed when the project configuration changes.
-        // The event is the same as for 'onChange'.
-    }
-
-    def onShutdown = { event ->
-        // TODO Implement code that is executed when the application shuts down (optional)
     }
 
 }
