@@ -66,18 +66,28 @@ class SelectionService {
      * @return a new URI instance with query appended
      */
     URI addQuery(URI uri, Map query) {
-        def tmp = uri.toString()
-        def queryString = SelectionUtils.toQueryString(query).substring(1) // Remove the leading '?'
-        if (queryString) {
-            if (tmp.indexOf('?') > -1) {
-                if (tmp[-1] != '?') {
-                    tmp += '&' // Append our query to the existing query.
+        def q = SelectionUtils.queryAsMap(uri.query)
+        println "existing query=$q"
+        query.each{key, value->
+            if(value instanceof Collection) {
+                def list = q.get(key, [])
+                if(! (list instanceof Collection)) {
+                    list = [list]
+                    q[key] = list
+                }
+                for(v in value) {
+                    if(! list.contains(v)) {
+                        list << v
+                    }
                 }
             } else {
-                tmp += '?' // No existing query, our query will be the complete query.
+               q[key] = value
             }
         }
-        new URI(tmp + queryString)
+        println "new map=$q"
+        def queryString = SelectionUtils.toQueryString(q).substring(1) // Remove the leading '?'
+        println "query=$queryString"
+        new URI(uri.scheme, uri.userInfo, uri.host, uri.port, uri.path, queryString, null)
     }
 
     /**

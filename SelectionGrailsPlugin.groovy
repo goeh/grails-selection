@@ -22,7 +22,7 @@ import org.codehaus.groovy.grails.web.servlet.mvc.GrailsParameterMap
 
 class SelectionGrailsPlugin {
     // the plugin version
-    def version = "0.8.0"
+    def version = "0.9.0"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "2.0 > *"
     // the other plugins this plugin depends on
@@ -73,10 +73,6 @@ Example 4: https://dialer.mycompany.com/outbound/next?agent=liza
 
     // Online location of the plugin's browseable source code.
     def scm = [url: "https://github.com/goeh/grails-selection"]
-
-    def doWithWebDescriptor = { xml ->
-        // TODO Implement additions to web.xml (optional), this event occurs before
-    }
 
     def doWithSpring = {
         // Create default criteria factory.
@@ -150,7 +146,6 @@ Example 4: https://dialer.mycompany.com/outbound/next?agent=liza
     }
 
     def doWithApplicationContext = { applicationContext ->
-        // TODO Implement post initialization spring config (optional)
         println "Installed selection handlers ${application.selectionClasses*.propertyName}"
 
     }
