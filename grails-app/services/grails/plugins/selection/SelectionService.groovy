@@ -67,7 +67,6 @@ class SelectionService {
      */
     URI addQuery(URI uri, Map query) {
         def q = SelectionUtils.queryAsMap(uri.query)
-        println "existing query=$q"
         query.each{key, value->
             if(value instanceof Collection) {
                 def list = q.get(key, [])
@@ -84,9 +83,7 @@ class SelectionService {
                q[key] = value
             }
         }
-        println "new map=$q"
         def queryString = SelectionUtils.toQueryString(q).substring(1) // Remove the leading '?'
-        println "query=$queryString"
         new URI(uri.scheme, uri.userInfo, uri.host, uri.port, uri.path, queryString, null)
     }
 
