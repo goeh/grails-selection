@@ -105,7 +105,11 @@ class SelectionService {
             s << uri.path
         }
         if (queryString) {
-            s << queryString
+            s << queryString // Already encoded.
+        }
+        if(uri.fragment) {
+            s << '#'
+            s << uri.fragment.encodeAsURL()
         }
         if (log.isDebugEnabled()) {
             log.debug "Added query $query to URI [$uri], new URI: [$s]"
