@@ -67,7 +67,7 @@ class BeanSelectionTests extends GroovyTestCase {
      */
     void testListAndMapArguments() {
         assert selectionService.select("bean://selectionTestService/join/2012/01/31?separator=%2B") == "2012+01+31"
-        assert selectionService.select("bean://selectionTestService/join/2012/01/31", [separator:'+']) == "2012+01+31"
+        assert selectionService.select("bean://selectionTestService/join/2012/01/31", [separator: '+']) == "2012+01+31"
     }
 
     /**
@@ -75,8 +75,15 @@ class BeanSelectionTests extends GroovyTestCase {
      */
     void testListAndMapAndParams() {
         // Test method signature (Object, Map, Map)
-        assert selectionService.select("bean://selectionTestService/convert1/Hello?type=uppercase", [repeat:5]) == "HELLOHELLOHELLOHELLOHELLO"
+        assert selectionService.select("bean://selectionTestService/convert1/Hello?type=uppercase", [repeat: 5]) == "HELLOHELLOHELLOHELLOHELLO"
         // Test method signature (List, Map, Map)
-        assert selectionService.select("bean://selectionTestService/convert2/Hello/World?type=lowercase", [repeat:2]) == "hello worldhello world"
+        assert selectionService.select("bean://selectionTestService/convert2/Hello/World?type=lowercase", [repeat: 2]) == "hello worldhello world"
+    }
+
+    /**
+     * Test URL encoded arguments.
+     */
+    void testUrlEncoding() {
+        assert selectionService.select("bean://selectionTestService/join/%3C/%3E?separator=%C3%B6") == "<ö>"
     }
 }

@@ -31,6 +31,10 @@ class SelectionServiceTests extends GroovyTestCase {
         assert selectionService.addQuery(new URI("gorm://testEntity/list"), [name: 'Joe', age: ['40', '50']]).query == 'name=Joe&age=40&age=50'
     }
 
+    void testAddQueryWithUrlEncodedParameter() {
+        assert selectionService.addQuery(new URI("gorm://testEntity/list"), [name: 'Göran', age: '47']).query == 'name=Göran&age=47'
+    }
+
     void testParameterMapQuery() {
         def values = [id: "gorm://testEntity/list".encodeAsURL(), offset: 0, max: 10, controller: "integration", action: "test", name: "Foo"]
         def params = new GrailsParameterMap(values, null)

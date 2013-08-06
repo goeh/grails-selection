@@ -67,24 +67,50 @@ class SelectionService {
      */
     URI addQuery(URI uri, Map query) {
         def q = SelectionUtils.queryAsMap(uri.query)
-        query.each{key, value->
-            if(value instanceof Collection) {
+        query.each { key, value ->
+            if (value instanceof Collection) {
                 def list = q.get(key, [])
-                if(! (list instanceof Collection)) {
+                if (!(list instanceof Collection)) {
                     list = [list]
                     q[key] = list
                 }
-                for(v in value) {
-                    if(! list.contains(v)) {
+                for (v in value) {
+                    if (!list.contains(v)) {
                         list << v
                     }
                 }
             } else {
-               q[key] = value
+                q[key] = value
             }
         }
-        def queryString = SelectionUtils.toQueryString(q).substring(1) // Remove the leading '?'
-        new URI(uri.scheme, uri.userInfo, uri.host, uri.port, uri.path, queryString, null)
+        def queryString = SelectionUtils.toQueryString(q)
+        def s = new StringBuilder()
+        s << uri.scheme
+        s << ':'
+        if (uri.userInfo || uri.host || uri.port) {
+            s << '//'
+            if (uri.userInfo) {
+                s << uri.userInfo.encodeAsURL()
+                s << '@'
+            }
+            if (uri.host) {
+                s << uri.host
+            }
+            if (uri.port > 0) {
+                s << ':'
+                s << uri.port.toString()
+            }
+        }
+        if (uri.path) {
+            s << uri.path
+        }
+        if (queryString) {
+            s << queryString
+        }
+        if (log.isDebugEnabled()) {
+            log.debug "Added query $query to URI [$uri], new URI: [$s]"
+        }
+        new URI(s.toString())
     }
 
     /**
