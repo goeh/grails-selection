@@ -12,14 +12,11 @@ class SelectionTagLib {
 
     /**
      * Create a link that includes a selection URI with encoding specified in Config.groovy [selection.uri.encoding].
-     * @attr REQUIRED selection the selection uri to include in the link
+     * @attr selection the selection uri to include in the link, if null or not specified this tag is equivalent to g:link
      * @attr parameter parameter name, if omitted config option 'selection.uri.parameter' or 'id' is used.
      */
     def link = {attrs, body ->
-        if (!attrs.selection) {
-            throwTagError("Tag [link] is missing required attribute [selection]")
-        }
-        out << g.link(createLinkParams(attrs), body)
+        out << g.link(attrs.selection ? createLinkParams(attrs) : attrs, body)
     }
 
     /**
