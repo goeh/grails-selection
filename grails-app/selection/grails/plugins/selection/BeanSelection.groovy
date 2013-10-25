@@ -73,7 +73,9 @@ class BeanSelection {
         // Query will be sent to the method as a named arguments Map.
         def query = uri.rawQuery ? WebUtils.fromQueryString(uri.rawQuery) : [:]
 
-        log.debug("method=$method args=$args query=$query")
+        if(log.isDebugEnabled()) {
+            log.debug("method=$method args=$args query=$query")
+        }
 
         // Construct method arguments depending on supplied parameters.
         def methodArguments = []
