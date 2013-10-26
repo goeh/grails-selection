@@ -9,13 +9,6 @@ class SelectionTagLibTests extends GroovyPagesTestCase {
 
     def grailsApplication
 
-    void testMissingParameter() {
-        shouldFail {
-            def template = '<select:link controller="testEntity" action="list">Test</select:link>'
-            applyTemplate(template)
-        }
-    }
-
     void testSelectionLinkNoEncoding() {
 
         // Initialize a known config.
@@ -99,5 +92,23 @@ class SelectionTagLibTests extends GroovyPagesTestCase {
         def uri = new URI("gorm://testEntity/list?name=A*")
         def template = '<select:encode selection="\${uri}"/>'
         assert applyTemplate(template, [uri: uri]) == "Z29ybTovL3Rlc3RFbnRpdHkvbGlzdD9uYW1lPUEq"
+    }
+
+    void testHiddenField() {
+        // Initialize a known config.
+        grailsApplication.config.selection.uri.encoding = 'base64'
+
+        def uri = new URI("gorm://testEntity/list?name=A*")
+        def template = '<select:hiddenField selection="\${uri}"/>'
+        assert applyTemplate(template, [uri: uri]) == '<input type="hidden" name="selection" value="Z29ybTovL3Rlc3RFbnRpdHkvbGlzdD9uYW1lPUEq"/>'
+    }
+
+    void testHiddenFieldWithNoSelection() {
+        // Initialize a known config.
+        grailsApplication.config.selection.uri.encoding = 'base64'
+
+        def uri = new URI("gorm://testEntity/list?name=A*")
+        def template = '<select:hiddenField selection="\${uri}"/>'
+        assert applyTemplate(template, [:]) == '<input type="hidden" name="selection" value=""/>'
     }
 }

@@ -15,7 +15,7 @@ class SelectionTagLib {
      * @attr selection the selection uri to include in the link, if null or not specified this tag is equivalent to g:link
      * @attr parameter parameter name, if omitted config option 'selection.uri.parameter' or 'id' is used.
      */
-    def link = {attrs, body ->
+    def link = { attrs, body ->
         out << g.link(attrs.selection ? createLinkParams(attrs) : attrs, body)
     }
 
@@ -24,10 +24,10 @@ class SelectionTagLib {
      * @attr selection the selection uri to include
      * @attr parameter parameter name, if omitted config option 'selection.uri.parameter' or 'id' is used.
      */
-    def createLink = {attrs ->
+    def createLink = { attrs ->
         def uri = g.createLink(createLinkParams(attrs))
         out << uri
-        if(! attrs.selection) {
+        if (!attrs.selection) {
             out << (new URI(uri.toString()).query ? '&' : '?') // TODO Is uri.toString() correct here? encoding???
             out << grailsApplication.config.selection.uri.parameter ?: 'q'
             out << '='
@@ -37,7 +37,7 @@ class SelectionTagLib {
     /**
      * Encode selection URI with encoding specified in Config.groovy [selection.uri.encoding].
      */
-    def encode = {attrs ->
+    def encode = { attrs ->
         def uri = attrs.selection
         if (!uri) {
             throwTagError("Tag [encode] is missing required attribute [selection]")
@@ -46,6 +46,20 @@ class SelectionTagLib {
             uri = new URI(uri.toString())
         }
         out << selectionService.encodeSelection(uri)
+    }
+
+    def hiddenField = { attrs ->
+        def uri = attrs.selection
+        if (uri && !(uri instanceof URI)) {
+            uri = new URI(uri.toString())
+        }
+        out << '<input type="hidden" name="'
+        out << (attrs.name ?: 'selection')
+        out << '" value="'
+        if(uri) {
+            out << selectionService.encodeSelection(uri)
+        }
+        out << '"/>'
     }
 
     private Map createLinkParams(Map attrs) {
