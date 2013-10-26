@@ -21,13 +21,9 @@ import grails.plugins.selection.GrailsSelectionClass
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsParameterMap
 
 class SelectionGrailsPlugin {
-    // the plugin version
-    def version = "0.9.2"
-    // the version or versions of Grails the plugin is designed for
+    def version = "0.9.3-SNAPSHOT"
     def grailsVersion = "2.0 > *"
-    // the other plugins this plugin depends on
     def dependsOn = [:]
-    // resources that are excluded from plugin packaging
     def pluginExcludes = [
             "grails-app/views/error.gsp",
             "grails-app/domain/**",
@@ -54,24 +50,10 @@ Example 3: bean://myService/method
 Example 4: https://dialer.mycompany.com/outbound/next?agent=liza
 '''
 
-    // URL to the plugin's documentation
-    def documentation = "http://grails.org/plugin/selection"
-
-    // Extra (optional) plugin metadata
-
-    // License: one of 'APACHE', 'GPL2', 'GPL3'
+    def documentation = "https://github.com/goeh/grails-selection"
     def license = "APACHE"
-
-    // Details of company behind the plugin (if there is one)
     def organization = [name: "Technipelago AB", url: "http://www.technipelago.se/"]
-
-    // Any additional developers beyond the author specified above.
-    //    def developers = [ [ name: "Joe Bloggs", email: "joe@bloggs.net" ]]
-
-    // Location of the plugin's issue tracker.
-    def issueManagement = [system: "JIRA", url: "http://jira.grails.org/browse/GPSELECTION"]
-
-    // Online location of the plugin's browseable source code.
+    def issueManagement = [system: "github", url: "https://github.com/goeh/grails-selection/issues"]
     def scm = [url: "https://github.com/goeh/grails-selection"]
 
     def doWithSpring = {
