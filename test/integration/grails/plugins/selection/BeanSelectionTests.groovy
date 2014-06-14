@@ -42,6 +42,49 @@ class BeanSelectionTests extends GroovyTestCase {
     }
 
     /**
+     * Expect exception when referencing a method not annotated with @Selectable.
+     */
+    void testNotSelectableMethod() {
+        shouldFail(SecurityException) {
+            selectionService.select("bean://selectionTestService/notSelectable1")
+        }
+    }
+
+    void testAllMethodsSelectable() {
+        try {
+            SelectionTestService.selectable = true
+            selectionService.select("bean://selectionTestService/notSelectable1")
+        } finally {
+            SelectionTestService.selectable = null
+        }
+    }
+
+    void testOneMethodSelectable() {
+        try {
+            SelectionTestService.selectable = 'notSelectable1'
+            selectionService.select("bean://selectionTestService/notSelectable1")
+            shouldFail(SecurityException) {
+                selectionService.select("bean://selectionTestService/notSelectable2")
+            }
+        } finally {
+            SelectionTestService.selectable = null
+        }
+    }
+
+    void testTwoMethodsSelectable() {
+        try {
+            SelectionTestService.selectable = ['notSelectable1', 'notSelectable2']
+            selectionService.select("bean://selectionTestService/notSelectable1")
+            selectionService.select("bean://selectionTestService/notSelectable2")
+            shouldFail(SecurityException) {
+                selectionService.select("bean://selectionTestService/notSelectable3")
+            }
+        } finally {
+            SelectionTestService.selectable = null
+        }
+    }
+
+    /**
      * Test method with no arguments.
      */
     void testNoArguments() {

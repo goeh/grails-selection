@@ -16,7 +16,13 @@
  */
 package grails.plugins.selection
 
+import groovy.transform.CompileStatic
+import org.apache.commons.lang.reflect.FieldUtils
+import org.apache.commons.lang.reflect.MethodUtils
 import org.codehaus.groovy.grails.web.util.WebUtils
+import org.springframework.util.ReflectionUtils
+
+import java.lang.reflect.Method
 
 /**
  * A selection handler that call methods on Spring Beans.
@@ -38,6 +44,7 @@ class BeanSelection {
      * @param uri the URI to check support for
      * @return true if uri.scheme is 'bean'
      */
+    @CompileStatic
     boolean supports(URI uri) {
         return uri?.scheme == 'bean'
     }
@@ -61,19 +68,22 @@ class BeanSelection {
             throw new IllegalArgumentException("URI has no bean method (path) [$uri]")
         }
         // If the method name is followed by one or more slashes, they are treated as positional method arguments.
-        def args = path.split('/').toList()
-        def method = args.remove(0)
+        List<String> parts = path.split('/').toList()
+        String method = parts.remove(0)
+        def args
 
-        if (args.size() == 0) {
+        if (parts.size() == 0) {
             args = null
-        } else if (args.size() == 1) {
-            args = args[0]
+        } else if (parts.size() == 1) {
+            args = parts[0]
+        } else {
+            args = parts
         }
 
         // Query will be sent to the method as a named arguments Map.
         def query = uri.rawQuery ? WebUtils.fromQueryString(uri.rawQuery) : [:]
 
-        if(log.isDebugEnabled()) {
+        if (log.isDebugEnabled()) {
             log.debug("method=$method args=$args query=$query")
         }
 
@@ -88,18 +98,71 @@ class BeanSelection {
         if (params != null) {
             methodArguments << params
         }
-        def result
-        switch (methodArguments.size()) {
-            case 0:
-                result = bean."$method"()
-                break
-            case 1:
-                result = bean.invokeMethod(method, methodArguments[0])
-                break
-            default:
-                result = bean.invokeMethod(method, methodArguments.toArray())
-                break
+
+        def m = resolveMethod(bean, method, methodArguments)
+        if (m == null) {
+            throw new MissingMethodException(method, bean.class, methodArguments.toArray())
         }
-        return result
+
+        if (!isSelectable(bean, m)) {
+            throw new SecurityException("Method [${m.name}] on class [${bean.class.name}] is not selectable")
+        }
+
+        invoke(bean, m, methodArguments)
+    }
+
+    @CompileStatic
+    private Object invoke(Object target, Method m, List args) {
+        switch (args.size()) {
+            case 0:
+                return ReflectionUtils.invokeMethod(m, target)
+            case 1:
+                return ReflectionUtils.invokeMethod(m, target, args[0])
+            default:
+                return ReflectionUtils.invokeMethod(m, target, args.toArray())
+        }
+    }
+
+    @CompileStatic
+    private Method resolveMethod(Object target, String methodName, List args) {
+        Class[] types = args.collect { it.class }.toArray(new Class[args.size()])
+        Method m
+        if (types == null || types.length == 0) {
+            m = MethodUtils.getMatchingAccessibleMethod(target.class, methodName)
+        } else {
+            m = MethodUtils.getMatchingAccessibleMethod(target.class, methodName, types)
+        }
+        return m
+    }
+
+    public static final String SELECTABLE_PROPERTY = 'selectable'
+
+    /*
+     * There are four ways to make a method selectable.
+     * 1. Annotate method with @Selectable
+     * 2. static selectable = true on the class will make all methods selectable
+     * 3. static selectable = 'methodName' will make that method selectable
+     * 4. static selectable = ['method1', 'method2', ...] will make multiple methods selectable
+     *
+     * @param target target instance
+     * @param m method
+     * @return true if method is selectable
+     */
+
+    @CompileStatic
+    private boolean isSelectable(Object target, Method m) {
+        if (m.isAnnotationPresent(Selectable)) {
+            return true
+        }
+        Object selectable = FieldUtils.readField(target, SELECTABLE_PROPERTY, true)
+        if (selectable != null) {
+            if (selectable instanceof Collection) {
+                return selectable.contains(m.getName())
+            } else if (selectable instanceof Boolean) {
+                return selectable
+            }
+            return selectable.toString() == m.getName()
+        }
+        return false
     }
 }
