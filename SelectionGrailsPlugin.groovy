@@ -21,7 +21,7 @@ import grails.plugins.selection.GrailsSelectionClass
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsParameterMap
 
 class SelectionGrailsPlugin {
-    def version = "0.9.3"
+    def version = "0.9.4-SNAPSHOT"
     def grailsVersion = "2.0 > *"
     def dependsOn = [:]
     def pluginExcludes = [
@@ -37,7 +37,7 @@ class SelectionGrailsPlugin {
     ]
     def artefacts = [new SelectionArtefactHandler()]
 
-    def title = "Selection Plugin" // Headline display name of the plugin
+    def title = "Selection Plugin"
     def author = "Goran Ehrsson"
     def authorEmail = "goran@technipelago.se"
     def description = '''\
@@ -109,15 +109,14 @@ Example 4: https://dialer.mycompany.com/outbound/next?agent=liza
             if (uri) {
                 switch (application.config.selection.uri.encoding.toString().toLowerCase()) {
                     case 'none':
-                        break
-                    case 'base64':
-                        uri = new String(uri.decodeBase64())
+                    case 'url':
+                        uri = uri.decodeURL()
                         break
                     case 'hex':
                         uri = new String(uri.decodeHex())
                         break
-                    default:
-                        uri = uri.decodeURL()
+                    default: /* base64 */
+                        uri = new String(uri.decodeBase64())
                         break
                 }
                 return new URI(uri)
@@ -129,13 +128,9 @@ Example 4: https://dialer.mycompany.com/outbound/next?agent=liza
 
     def doWithApplicationContext = { applicationContext ->
         println "Installed selection handlers ${application.selectionClasses*.propertyName}"
-
     }
 
     def onChange = { event ->
-        // TODO Implement code that is executed when any artefact that this plugin is
-        // watching is modified and reloaded. The event contains: event.source,
-        // event.application, event.manager, event.ctx, and event.plugin.
         if (application.isSelectionClass(event.source)) {
             log.debug "Selection ${event.source} modified!"
 

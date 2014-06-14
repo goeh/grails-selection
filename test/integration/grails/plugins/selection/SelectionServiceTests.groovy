@@ -135,6 +135,7 @@ class SelectionServiceTests extends GroovyTestCase {
     void testParameterMapURI() {
         def values = [id: "gorm://testEntity/list?name=Foo"]
         def params = new GrailsParameterMap(values, null)
+        grailsApplication.config.selection.uri.encoding = 'none' // base64 is default since 0.9.4
         // The method getSelectionURI() is dynamically added by SelectionGrailsPlugin#doWithDynamicMethods()
         def uri = params.getSelectionURI()
         assert uri.toString() == "gorm://testEntity/list?name=Foo"
@@ -153,7 +154,7 @@ class SelectionServiceTests extends GroovyTestCase {
     void testParameterMapURIBase64Encoded() {
         def values = [id: "gorm://testEntity/list?name=Foo".encodeAsBase64()]
         def params = new GrailsParameterMap(values, null)
-        grailsApplication.config.selection.uri.encoding = 'base64'
+        grailsApplication.config.selection.uri.encoding = null // base64 is default since 0.9.4
         def uri = params.getSelectionURI()
         assert uri.toString() == "gorm://testEntity/list?name=Foo"
         assert uri.query == 'name=Foo'
@@ -169,7 +170,7 @@ class SelectionServiceTests extends GroovyTestCase {
     }
 
     void testParameterMapURIName() {
-        def uri = "gorm://testEntity/list".encodeAsURL()
+        def uri = "gorm://testEntity/list".encodeAsBase64()
         // 'id' is the default URI parameter name
         def params = new GrailsParameterMap([id: uri], null)
         assert params.getSelectionURI() != null
