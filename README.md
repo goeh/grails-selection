@@ -1,10 +1,39 @@
 #Grails Selection Plugin
 
-The selection plugin provides unified selection of information.
-It uses a URI based syntax to select any information from any resource.
-Grails plugins can add custom search providers.
+The selection plugin provides a unified method to query information.
+It uses a URI based syntax to query any information from any resource. 
 
-def result = selectionService.select(URI, params)
+Two requirements motivated this plugin:
+
+1. Make it easy to query domain instances without the need to import the domain class being queried
+2. Make it possible to save a query for later use. No matter if the query was a simple *findBy* query
+or a complex *Criteria* query, or any other type of query.
+
+A URI based standard for query expressions makes both requirements possible.
+A query is expressed as a URI and contains all necessary information to perform
+the query at any time anywhere in the application.
+
+In most use-cases you implement the actual query logic in a grails service method.
+Then you create a query URI that includes the service, method and parameters.
+Then you call *selectionService.select(URI)* to perform the query and get the result.
+
+    def query = new URI("bean:personService/list?name=A*")
+    def people = selectionService.select(query, params)
+
+This means that to perform a query anywhere in the application you only need
+an injected selectionService and a query URI.
+
+Other grails plugins can add custom search providers. The *selection* plugin contains
+three providers: *bean*, *gorm* and *proxy* that will be described below.
+
+The GR8 CRM ecosystem (http://gr8crm.github.io) makes extensive use of the selection plugin.
+Each plugin in GR8 CRM focuses on one specific domain, for example *contact*, *project* or *document*.
+Each plugin implements the query logic for it's domain model in a service.
+Anywhere, from the application or from a plugin a query can be executed without
+the need to import the domain class being queried. The only objects needed are
+a SelectionService instance and a URI that contains th query expression.
+This avoids tight coupling between plugins but still makes it possible to query
+almost any information.
 
 **URI examples**
 
@@ -12,13 +41,75 @@ def result = selectionService.select(URI, params)
 - bean://myService/method/arg
 - https://dialer.mycompany.com/outbound/next?agent=liza
 
+The result of invoking selectionService.selection(...) is implementation dependent,
+but typically the result is an instance of PagedResult or ArrayList.
+The 'gorm' selection always returns a List of domain instances.
+
+
+
+## GORM Selection
+
+The **gorm** selection handler provides standard GORM list() and get() queries.
+
+Examples:
+
+- gorm://grails.plugins.crm.contact.CrmContact/list?lastName=Anderson
+- gorm://crmContact/list?firstName=Sven&lastName=Anderson
+- gorm://demo.Book/get?id=42
+
+## Bean Selection
+
+The **bean** selection handler makes it possible to call a method on a Spring bean.
+For security reasons the method to call must be annotated with *@Selectable*.
+
+    class CustomerService {
+      ...
+      @Selectable
+      def list(Map query, Map params) {
+        Customer.createCriteria().list(params) {
+          if(query.customerNo) {
+            eq('customerNo', query.customerNo)
+          }
+          if(query.name) {
+            ilike('name', query.name.replace('*', '%'))
+          }
+        }
+      }
+
+Examples:
+
+- bean:customerService/list?name=Acme+Inc.&offset=0&max=25
+- bean:crmContactService/list?name=Fred*&state=CA&offset=50&max=25
+- bean://logService/getEvents?status=new
+- bean://anotherBean/getSomething/arg1/arg2/arg3
+- bean://erpIntegrationBean/getInvoices?date=%3E2014-06-15
+ 
+## LDAP Selection
+
 *LDAP support is provided by the selection-ldap plugin*
+
+Examples:
 
 - ldap:dc=example,dc=com&filter=(objectClass=people)
 
-*Persistent selections are provided by the selection-repository plugin*
+## Persistent Selections
 
-- repo:453?offset=0&max=10&sort=lastName&order=asc
+Queries can be saved for later use with the *selection-repo* plugin.
 
-The result of invoking selectionService.selection(...) is implementation dependent,
-but the 'gorm' selection always returns domain instances.
+Example 1 - save a query and use the returned URI in another part of the program to execute the query:
+
+    def query = new URI("gorm://person/list?name=A*")
+    def uri = selectionRepositoryService.put(query, "person", null, "People with name beginning with A")
+    ...
+    def result = selectionService.select(uri, [offset:0, max: 25])
+
+Example 2 - save a query and retrieve it later to execute the query:
+
+    def query = new URI("gorm://person/list?name=David+Johnson")
+    selectionRepositoryService.put(query, "person", null, "David Johnson")
+    ...
+    def savedQueries = selectionRepositoryService.list("person")
+    def davidQuery = savedQueries.first().uri
+    def result = selectionService.select(davidQuery, [offset:0, max: 25])
+    assert result.size() == 1
+    assert result[0].name == "David Johnson"
