@@ -18,20 +18,21 @@ Then you create a query URI that includes the service, method and parameters.
 Then you call *selectionService.select(URI)* to perform the query and get the result.
 
     def query = new URI("bean:personService/list?name=A*")
-    def people = selectionService.select(query, params)
+    def people = selectionService.select(query, [offset:0, max: 10])
 
 This means that to perform a query anywhere in the application you only need
-an injected selectionService and a query URI.
+an injected SelectionService and a query URI.
 
 Other grails plugins can add custom search providers. The *selection* plugin contains
 three providers: *bean*, *gorm* and *proxy* that will be described below.
 
-The GR8 CRM ecosystem (http://gr8crm.github.io) makes extensive use of the selection plugin.
-Each plugin in GR8 CRM focuses on one specific domain, for example *contact*, *project* or *document*.
+The [GR8 CRM ecosystem](http://gr8crm.github.io) makes extensive use of the selection plugin.
+Each GR8 CRM plugin focuses on one specific domain, for example *contact*, *project* or *document*.
+Each plugin defines a Bounded Context (DDD) and has minimal dependencies on other GR8 CRM plugins. 
 Each plugin implements the query logic for it's domain model in a service.
 Anywhere, from the application or from a plugin a query can be executed without
 the need to import the domain class being queried. The only objects needed are
-a SelectionService instance and a URI that contains th query expression.
+a SelectionService instance and a URI that contains the query expression.
 This avoids tight coupling between plugins but still makes it possible to query
 almost any information.
 
@@ -45,9 +46,9 @@ The result of invoking selectionService.selection(...) is implementation depende
 but typically the result is an instance of PagedResult or ArrayList.
 The 'gorm' selection always returns a List of domain instances.
 
+## Default Selection Providers
 
-
-## GORM Selection
+### GORM Selection
 
 The **gorm** selection handler provides standard GORM list() and get() queries.
 
@@ -57,7 +58,7 @@ Examples:
 - gorm://crmContact/list?firstName=Sven&lastName=Anderson
 - gorm://demo.Book/get?id=42
 
-## Bean Selection
+### Bean Selection
 
 The **bean** selection handler makes it possible to call a method on a Spring bean.
 For security reasons the method to call must be annotated with *@Selectable*.
@@ -83,10 +84,20 @@ Examples:
 - bean://logService/getEvents?status=new
 - bean://anotherBean/getSomething/arg1/arg2/arg3
 - bean://erpIntegrationBean/getInvoices?date=%3E2014-06-15
- 
+
+### Proxy Selection
+
+The proxy selection uses a normal URL with *http:*, *https:*, *ftp:* or *file:* scheme to retrieve a URI string.
+The returned URI will then be used to perform the actual query via *SelectionService*.
+
+Examples:
+
+- https://dialer.mycompany.com/call/outbound?agent=liza
+- http://localhost:8080/myapp/selection/453
+
 ## LDAP Selection
 
-*LDAP support is provided by the selection-ldap plugin*
+LDAP support is provided by the [selection-ldap](https://github.com/goeh/grails-selection-ldap) plugin.
 
 Examples:
 
@@ -94,7 +105,7 @@ Examples:
 
 ## Persistent Selections
 
-Queries can be saved for later use with the *selection-repo* plugin.
+Queries can be saved for later use with the [selection-repo](https://github.com/goeh/grails-selection-repo) plugin.
 
 Example 1 - save a query and use the returned URI in another part of the program to execute the query:
 
@@ -113,3 +124,20 @@ Example 2 - save a query and retrieve it later to execute the query:
     def result = selectionService.select(davidQuery, [offset:0, max: 25])
     assert result.size() == 1
     assert result[0].name == "David Johnson"
+
+## Develop your own custom selection provider
+
+The selection plugin uses standard Grails artifacts as selection providers.
+So if you want to add a custom provider, just create a a Groovy class in *grails-app/selection*.
+The class name must end with "Selection" and have two methods:
+
+**boolean supports(URI uri)**
+
+This method must return true if the selection provider supports the given URI.
+
+
+**def select(URI uri, Map params)**
+
+This method is responsible for returning the query result.
+It could perform the query itself, or delegate to another service.
+The *URI* parameter contains the query expression and the *Map* can contain parameters for pagination and sorting.
