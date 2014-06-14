@@ -95,7 +95,7 @@ Examples:
 - https://dialer.mycompany.com/call/outbound?agent=liza
 - http://localhost:8080/myapp/selection/453
 
-## LDAP Selection
+## LDAP Selection Plugin
 
 LDAP support is provided by the [selection-ldap](https://github.com/goeh/grails-selection-ldap) plugin.
 
@@ -103,14 +103,14 @@ Examples:
 
 - ldap:dc=example,dc=com&filter=(objectClass=people)
 
-## Persistent Selections
+## Persistent Selections Plugin
 
 Queries can be saved for later use with the [selection-repo](https://github.com/goeh/grails-selection-repo) plugin.
 
-Example 1 - save a query and use the returned URI in another part of the program to execute the query:
+Example 1 - save a query and use the returned URI in another part of the application to execute the query:
 
     def query = new URI("gorm://person/list?name=A*")
-    def uri = selectionRepositoryService.put(query, "person", null, "People with name beginning with A")
+    def uri = selectionRepositoryService.put(query, "person", null, "People who's name begins with A")
     ...
     def result = selectionService.select(uri, [offset:0, max: 25])
 
