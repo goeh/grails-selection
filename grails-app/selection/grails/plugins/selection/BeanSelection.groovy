@@ -20,8 +20,10 @@ import groovy.transform.CompileStatic
 import org.apache.commons.lang.reflect.FieldUtils
 import org.apache.commons.lang.reflect.MethodUtils
 import org.codehaus.groovy.grails.web.util.WebUtils
+import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.util.ReflectionUtils
 
+import java.lang.reflect.Field
 import java.lang.reflect.Method
 
 /**
@@ -151,17 +153,20 @@ class BeanSelection {
 
     @CompileStatic
     private boolean isSelectable(Object target, Method m) {
-        if (m.isAnnotationPresent(Selectable)) {
+        if(AnnotationUtils.findAnnotation(m, Selectable)) {
             return true
         }
-        Object selectable = FieldUtils.readField(target, SELECTABLE_PROPERTY, true)
-        if (selectable != null) {
-            if (selectable instanceof Collection) {
-                return selectable.contains(m.getName())
-            } else if (selectable instanceof Boolean) {
-                return selectable
+        Field selectableProperty = ReflectionUtils.findField(target.class, SELECTABLE_PROPERTY)
+        if (selectableProperty != null) {
+            Object selectable = FieldUtils.readField(target, SELECTABLE_PROPERTY, true)
+            if (selectable != null) {
+                if (selectable instanceof Collection) {
+                    return selectable.contains(m.getName())
+                } else if (selectable instanceof Boolean) {
+                    return selectable
+                }
+                return selectable.toString() == m.getName()
             }
-            return selectable.toString() == m.getName()
         }
         return false
     }
