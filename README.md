@@ -58,10 +58,19 @@ Examples:
 - gorm://crmContact/list?firstName=Sven&lastName=Anderson
 - gorm://demo.Book/get?id=42
 
+This it very powerful and flexible but it also introduces a security risk if you put this tool
+in the hands of your users (like accepting query URI:s as request parameters).
+So to enable gorm selections you must configure (in Config.groovy) a white list of domain classes
+that you want to use with gorm selections.
+
+    selection.gorm.true // No restrictions, all domain classes are selectable (use with care).
+    selection.gorm.com.mycompany.Person // Allow gorm selection on Person domain class only
+    selection.gorm.com.mycompany // Allow gorm selections on all domain classes in package com.mycompany
+    
 ### Bean Selection
 
 The **bean** selection handler makes it possible to call a method on a Spring bean.
-For security reasons the method to call must be annotated with *@Selectable*.
+For security reasons the method to call must be annotated with *@grails.plugins.selection.Selectable*.
 
     class CustomerService {
       ...
