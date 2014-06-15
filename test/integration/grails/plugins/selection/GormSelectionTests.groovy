@@ -16,6 +16,7 @@
  */
 package grails.plugins.selection
 
+import org.junit.Before
 import test.TestEntity
 
 /**
@@ -24,8 +25,31 @@ import test.TestEntity
  */
 public class GormSelectionTests extends GroovyTestCase {
 
+    def grailsApplication
     def selectionService
     def gormSelection
+
+    @Before
+    void makeAllSelectable() {
+        grailsApplication.config.selection.gorm = true
+    }
+
+    void testConfiguration() {
+        grailsApplication.config.selection.remove('gorm')
+        shouldFail(SecurityException) {
+            selectionService.select("gorm://test.TestEntity/list")
+        }
+
+        grailsApplication.config.selection.gorm.test.TestEntity = true
+        selectionService.select("gorm://test.TestEntity/list")
+        shouldFail(SecurityException) {
+            selectionService.select("gorm://test.TestEntity2/list")
+        }
+
+        grailsApplication.config.selection.gorm.test = true
+        selectionService.select("gorm://test.TestEntity/list")
+        selectionService.select("gorm://test.TestEntity2/list")
+    }
 
     void testNonExistingHandler() {
         shouldFail(IllegalArgumentException) {
@@ -138,7 +162,7 @@ public class GormSelectionTests extends GroovyTestCase {
         new TestEntity(number: "13", name: "Thirteen").save(flush: true)
         def result = selectionService.select("gorm://test.TestEntity/random?name=" + "T%".encodeAsURL(), [max: 3])
         assert result.size() == 3
-        result.each {assert it.name.startsWith('T')}
+        result.each { assert it.name.startsWith('T') }
     }
 
     void testRandomFixedCriteria() {
@@ -162,7 +186,7 @@ public class GormSelectionTests extends GroovyTestCase {
         try {
             def result = selectionService.select("gorm://test.TestEntity/random", [max: 3])
             assert result.size() == 3
-            result.each {assert it.name.startsWith('T')}
+            result.each { assert it.name.startsWith('T') }
         } finally {
             gormSelection.fixedCriteria = null
         }
@@ -179,7 +203,7 @@ public class GormSelectionTests extends GroovyTestCase {
 
         def backup = gormSelection.getCriteria(TestEntity)
 
-        gormSelection.setCriteria(TestEntity) {query, params ->
+        gormSelection.setCriteria(TestEntity) { query, params ->
             if (query.name) {
                 ilike('name', '%' + query.name + '%')
             }
@@ -200,23 +224,22 @@ public class GormSelectionTests extends GroovyTestCase {
             // Test greater than.
             def result = selectionService.select("gorm://test.TestEntity/list?age=" + ">40".encodeAsURL())
             assert result.size() == 2
-            result.each {assert it.age > 40}
+            result.each { assert it.age > 40 }
 
             // Test less than.
             result = selectionService.select("gorm://test.TestEntity/list?age=" + "<40".encodeAsURL())
             assert result.size() == 3
-            result.each {assert it.age < 40}
+            result.each { assert it.age < 40 }
 
             // Test equals.
             result = selectionService.select("gorm://test.TestEntity/list?age=40")
             assert result.size() == 1
-            result.each {assert it.age == 40}
-
+            result.each { assert it.age == 40 }
 
             // Test between.
             result = selectionService.select("gorm://test.TestEntity/list?age=10-40")
             assert result.size() == 3
-            result.each {assert it.age >= 10 && it.age <= 40}
+            result.each { assert it.age >= 10 && it.age <= 40 }
 
             // Test between and name combined, this should not match.
             result = selectionService.select("gorm://test.TestEntity/list?name=Lisa&age=10-40")
@@ -225,7 +248,7 @@ public class GormSelectionTests extends GroovyTestCase {
             // Test between and name combined.
             result = selectionService.select("gorm://test.TestEntity/list?name=Jason&age=10-40")
             assert result.size() == 1
-            result.each {assert it.age == 11 && it.name == "Jason Average"}
+            result.each { assert it.age == 11 && it.name == "Jason Average" }
         } finally {
             gormSelection.setCriteria(TestEntity, backup)
         }

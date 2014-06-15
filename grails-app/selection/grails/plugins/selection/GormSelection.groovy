@@ -16,6 +16,7 @@
  */
 package grails.plugins.selection
 
+import org.apache.commons.lang.StringUtils
 import org.codehaus.groovy.grails.web.util.WebUtils
 
 /**
@@ -43,6 +44,38 @@ class GormSelection {
     Closure fixedCriteria
 
     /**
+     * A domain class is selectable if it's configured to be selectable.
+     * Example configurations for domain class com.mycompany.Person:
+     * selection.gorm = true -> All domain classes are selectable
+     * selection.gorm.com.mycompany.Person -> Only Person is selectable
+     * selection.gorm.com.mycompany -> All domain classes in package com.mycompany are selectable
+     *
+     * @param domainClass the domain class to check
+     * @return true if domain class is selectable
+     */
+    private boolean isSelectable(Class domainClass) {
+        def config = grailsApplication.config.selection.gorm
+        if (config == true) {
+            return true
+        } else if(config) {
+            config = config.flatten()
+            String name = domainClass.name
+            while (name) {
+                if (config[name] == true) {
+                    return true
+                }
+                String tmp = StringUtils.substringBeforeLast(name, '.')
+                if (tmp == name) {
+                    name = null
+                } else {
+                    name = tmp
+                }
+            }
+        }
+        return false
+    }
+
+    /**
      * This selection handler support all gorm: queries.
      * @param uri the URI to check support for
      * @return true if uri.scheme is 'gorm'
@@ -53,10 +86,13 @@ class GormSelection {
 
     def select(URI uri, Map params) {
         def clazz = getDomainClass(uri.host)
+        if (!isSelectable(clazz)) {
+            throw new SecurityException("Domain class [${clazz.name}] is not selectable")
+        }
         def method = uri.path?.decodeURL()
         def query = uri.rawQuery ? WebUtils.fromQueryString(uri.rawQuery) : [:]
         // params can be null but criteria methods in the class requires a Map.
-        if(params == null) {
+        if (params == null) {
             params = [:]
         }
 
@@ -68,7 +104,7 @@ class GormSelection {
             case '/random':
                 return doRandom(clazz, query, params)
             default:
-                throw new IllegalArgumentException("$method: unknown method")
+                throw new IllegalArgumentException("Method [$method] is not a valid selection method for [${clazz.name}]")
         }
     }
 
@@ -78,7 +114,7 @@ class GormSelection {
      * @param name domain property name i.e. "homeAddress" or class name "com.mycompany.HomeAddress"
      */
     private Class getDomainClass(String name) {
-        def domain = grailsApplication.domainClasses.find {it.propertyName == name}
+        def domain = grailsApplication.domainClasses.find { it.propertyName == name }
         if (domain) {
             domain = domain.clazz
         } else {
@@ -182,7 +218,7 @@ class GormSelection {
                 }
             } else {
                 Collections.shuffle(ids, random) // All records wanted! Stupid user? Let's return them shuffled.
-                result = ids.collect {clazz.get(it)} // Number of records wanted is greater or equal to total size.
+                result = ids.collect { clazz.get(it) } // Number of records wanted is greater or equal to total size.
             }
         } else if (nbr > 0) {
             // Only one record wanted, return it.
@@ -196,8 +232,7 @@ class GormSelection {
         selectionCriteriaFactory.getCriteria(clazz)
     }
 
-    public void setCriteria(Class clazz, Closure criteria)
-    {
+    public void setCriteria(Class clazz, Closure criteria) {
         selectionCriteriaFactory.setCriteria(clazz, criteria)
     }
 }

@@ -1,6 +1,6 @@
 package test
 
-class TestEntity {
+class TestEntity2 {
 
     String name
     String postalCode
