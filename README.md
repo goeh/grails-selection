@@ -61,12 +61,25 @@ Examples:
 This it very powerful and flexible but it also introduces a security risk if you put this tool
 in the hands of your users (like accepting query URI:s as request parameters).
 So to enable gorm selections you must configure (in Config.groovy) a white list of domain classes
-that you want to use with gorm selections.
+that you want to use with *gorm:* selections.
 
     selection.gorm.true // No restrictions, all domain classes are selectable (use with care).
     selection.gorm.com.mycompany.Person // Allow gorm selection on Person domain class only
     selection.gorm.com.mycompany // Allow gorm selections on all domain classes in package com.mycompany
+
+####Fixed criteria
+
+You can also restrict *gorm:* selections with a fixed criteria that will always be added to the query.
+
+Example: With this code in *BootStrap.groovy* every *gorm:* selection will be filtered on current user.
+
+    def gormSelection
     
+    gormSelection.fixedCriteria = { query, params ->
+        eq('username', SecurityUtils.subject.principal)
+    }
+
+
 ### Bean Selection
 
 The **bean** selection handler makes it possible to call a method on a Spring bean.
