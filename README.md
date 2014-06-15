@@ -1,4 +1,4 @@
-#Grails Selection Plugin
+# Grails Selection Plugin
 
 The selection plugin provides a unified method to query information.
 It uses a URI based syntax to query any information from any resource. 
@@ -23,12 +23,13 @@ Then you call *selectionService.select(URI)* to perform the query and get the re
 This means that to perform a query anywhere in the application you only need
 an injected SelectionService and a query URI.
 
-Other grails plugins can add custom search providers. The *selection* plugin contains
-three providers: *bean*, *gorm* and *proxy* that will be described below.
+Other grails plugins can add custom selection providers. The basic *selection* plugin contains
+three selection providers: *bean*, *gorm* and *proxy* that will be described below.
 
 The [GR8 CRM ecosystem](http://gr8crm.github.io) makes extensive use of the selection plugin.
 Each GR8 CRM plugin focuses on one specific domain, for example *contact*, *project* or *document*.
-Each plugin defines a Bounded Context (DDD) and has minimal dependencies on other GR8 CRM plugins. 
+Each plugin defines a [Bounded Context](http://martinfowler.com/bliki/BoundedContext.html)
+and has minimal dependencies on other GR8 CRM plugins. 
 Each plugin implements the query logic for it's domain model in a service.
 Anywhere, from the application or from a plugin a query can be executed without
 the need to import the domain class being queried. The only objects needed are
@@ -71,14 +72,18 @@ that you want to use with *gorm:* selections.
 
 You can also restrict *gorm:* selections with a fixed criteria that will always be added to the query.
 
-Example: With this code in *BootStrap.groovy* every *gorm:* selection will be filtered on current user.
+Example: With this code in *BootStrap.groovy* every *gorm:* selection will be filtered on current user (Apache Shiro).
 
-    def gormSelection
-    
-    gormSelection.fixedCriteria = { query, params ->
-        eq('username', SecurityUtils.subject.principal)
+    class BootStrap {
+        
+        def gormSelection
+        
+        def init = { servletContext ->
+            gormSelection.fixedCriteria = { query, params ->
+                eq('username', SecurityUtils.subject.principal)
+            }
+        }
     }
-
 
 ### Bean Selection
 
@@ -133,14 +138,16 @@ Example 1 - save a query and use the returned URI in another part of the applica
 
     def query = new URI("gorm://person/list?name=A*")
     def uri = selectionRepositoryService.put(query, "person", null, "People who's name begins with A")
-    ...
+    
+    Later...
     def result = selectionService.select(uri, [offset:0, max: 25])
 
 Example 2 - save a query and retrieve it later to execute the query:
 
     def query = new URI("gorm://person/list?name=David+Johnson")
     selectionRepositoryService.put(query, "person", null, "David Johnson")
-    ...
+    
+    Later...
     def savedQueries = selectionRepositoryService.list("person")
     def davidQuery = savedQueries.first().uri
     def result = selectionService.select(davidQuery, [offset:0, max: 25])
