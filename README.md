@@ -27,7 +27,7 @@ Other grails plugins can add custom selection providers. The basic *selection* p
 three selection providers: *bean*, *gorm* and *proxy* that will be described below.
 
 The [GR8 CRM ecosystem](http://gr8crm.github.io) makes extensive use of the selection plugin.
-Each GR8 CRM plugin focuses on one specific domain, for example *contact*, *project* or *document*.
+Each GR8 CRM plugin focus on one specific domain, for example *contact*, *project* or *document*.
 Each plugin defines a [Bounded Context](http://martinfowler.com/bliki/BoundedContext.html)
 and has minimal dependencies on other GR8 CRM plugins. 
 Each plugin implements the query logic for it's domain model in a service.
