@@ -132,7 +132,7 @@ Examples:
 
 ## Persistent Selections Plugin
 
-Queries can be saved for later use with the [selection-repo](https://github.com/goeh/grails-selection-repo) plugin.
+Queries can be saved for later use with the [selection-repository](https://github.com/goeh/grails-selection-repository) plugin.
 
 Example 1 - save a query and use the returned URI in another part of the application to execute the query:
 
