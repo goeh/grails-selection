@@ -64,9 +64,9 @@ in the hands of your users (like accepting query URI:s as request parameters).
 So to enable gorm selections you must configure (in Config.groovy) a white list of domain classes
 that you want to use with *gorm:* selections.
 
-    selection.gorm.true // No restrictions, all domain classes are selectable (use with care).
-    selection.gorm.com.mycompany.Person // Allow gorm selection on Person domain class only
-    selection.gorm.com.mycompany // Allow gorm selections on all domain classes in package com.mycompany
+    selection.gorm = true // No restrictions, all domain classes are selectable (use with care).
+    selection.gorm.com.mycompany.Person = true // Allow gorm selection on Person domain class only
+    selection.gorm.com.mycompany = true // Allow gorm selections on all domain classes in package com.mycompany
 
 ####Fixed criteria
 
