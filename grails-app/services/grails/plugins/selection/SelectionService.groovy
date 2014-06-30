@@ -126,12 +126,12 @@ class SelectionService {
         switch (grailsApplication.config.selection.uri.encoding.toString().toLowerCase()) {
             case 'none':
                 return uri.toString()
-            case 'base64':
-                return uri.toString().encodeAsBase64()
+            case 'url':
+                return uri.toString().encodeAsURL()
             case 'hex':
                 return uri.toString().encodeAsHex()
-            default:
-                return uri.toString().encodeAsURL()
+            default: /* base64 */
+                return uri.toString().encodeAsBase64()
         }
     }
 
@@ -145,14 +145,14 @@ class SelectionService {
             switch (grailsApplication.config.selection.uri.encoding.toString().toLowerCase()) {
                 case 'none':
                     break
-                case 'base64':
-                    uri = new String(uri.decodeBase64())
+                case 'url':
+                    uri = uri.decodeURL()
                     break
                 case 'hex':
                     uri = new String(uri.decodeHex())
                     break
-                default:
-                    uri = uri.decodeURL()
+                default: /* base64 */
+                    uri = new String(uri.decodeBase64())
                     break
             }
             return new URI(uri)
