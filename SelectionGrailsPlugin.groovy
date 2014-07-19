@@ -21,7 +21,7 @@ import grails.plugins.selection.GrailsSelectionClass
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsParameterMap
 
 class SelectionGrailsPlugin {
-    def version = "0.9.6"
+    def version = "0.9.7"
     def grailsVersion = "2.0 > *"
     def dependsOn = [:]
     def pluginExcludes = [
@@ -37,7 +37,7 @@ class SelectionGrailsPlugin {
     ]
     def artefacts = [new SelectionArtefactHandler()]
 
-    def title = "Selection Plugin"
+    def title = "Unified Selection"
     def author = "Goran Ehrsson"
     def authorEmail = "goran@technipelago.se"
     def description = '''\
@@ -76,7 +76,7 @@ Example 4: https://dialer.mycompany.com/outbound/next?agent=liza
             ctx.getBean('selectionService').encodeSelection(delegate)
         }
         URI.class.metaClass.getSelectionMap = {
-            def uriParameterName = application.config.selection.uri.parameter ?: 'id'
+            def uriParameterName = application.config.selection.uri.parameter ?: 'q'
             def s = ctx.getBean('selectionService').encodeSelection(delegate)
             return [(uriParameterName): s]
         }
@@ -85,7 +85,7 @@ Example 4: https://dialer.mycompany.com/outbound/next?agent=liza
         def mc = GrailsParameterMap.metaClass
         // Get all query values by filtering out known non-query values.
         mc.getSelectionQuery = { Map opts = [:] ->
-            def uriParameterName = application.config.selection.uri.parameter ?: 'id'
+            def uriParameterName = application.config.selection.uri.parameter ?: 'q'
             def excludeList = [uriParameterName, 'offset', 'max', 'sort', 'order', 'action', 'controller']
             if (opts.exclude) {
                 excludeList.addAll(opts.exclude)
@@ -103,7 +103,7 @@ Example 4: https://dialer.mycompany.com/outbound/next?agent=liza
         // Create a URI from
         mc.getSelectionURI = {String uriParameterName = null ->
             if (uriParameterName == null) {
-                uriParameterName = application.config.selection.uri.parameter ?: 'id'
+                uriParameterName = application.config.selection.uri.parameter ?: 'q'
             }
             String uri = delegate[uriParameterName]
             if (uri) {

@@ -36,13 +36,13 @@ class SelectionServiceTests extends GroovyTestCase {
     }
 
     void testParameterMapQuery() {
-        def values = [id: "gorm://testEntity/list".encodeAsURL(), offset: 0, max: 10, controller: "integration", action: "test", name: "Foo"]
+        def values = [q: "gorm://testEntity/list".encodeAsURL(), offset: 0, max: 10, controller: "integration", action: "test", name: "Foo"]
         def params = new GrailsParameterMap(values, null)
         // The method getSelectionQuery() is dynamically added by SelectionGrailsPlugin#doWithDynamicMethods()
         def query = params.getSelectionQuery()
 
         // The following parameters should be available in params
-        assert params.id != null
+        assert params.q != null
         assert params.offset != null
         assert params.max != null
         assert params.controller != null
@@ -52,7 +52,7 @@ class SelectionServiceTests extends GroovyTestCase {
         assert query.name != null
 
         // The following parameters should be discarded from query
-        assert query.id == null
+        assert query.q == null
         assert query.offset == null
         assert query.max == null
         assert query.controller == null
@@ -133,7 +133,7 @@ class SelectionServiceTests extends GroovyTestCase {
     }
 
     void testParameterMapURI() {
-        def values = [id: "gorm://testEntity/list?name=Foo"]
+        def values = [q: "gorm://testEntity/list?name=Foo"]
         def params = new GrailsParameterMap(values, null)
         grailsApplication.config.selection.uri.encoding = 'none' // base64 is default since 0.9.4
         // The method getSelectionURI() is dynamically added by SelectionGrailsPlugin#doWithDynamicMethods()
@@ -143,7 +143,7 @@ class SelectionServiceTests extends GroovyTestCase {
     }
 
     void testParameterMapURIEncoded() {
-        def values = [id: "gorm://testEntity/list?name=Foo".encodeAsURL()]
+        def values = [q: "gorm://testEntity/list?name=Foo".encodeAsURL()]
         def params = new GrailsParameterMap(values, null)
         grailsApplication.config.selection.uri.encoding = 'url'
         def uri = params.getSelectionURI()
@@ -152,7 +152,7 @@ class SelectionServiceTests extends GroovyTestCase {
     }
 
     void testParameterMapURIBase64Encoded() {
-        def values = [id: "gorm://testEntity/list?name=Foo".encodeAsBase64()]
+        def values = [q: "gorm://testEntity/list?name=Foo".encodeAsBase64()]
         def params = new GrailsParameterMap(values, null)
         grailsApplication.config.selection.uri.encoding = null // base64 is default since 0.9.4
         def uri = params.getSelectionURI()
@@ -161,7 +161,7 @@ class SelectionServiceTests extends GroovyTestCase {
     }
 
     void testParameterMapURIHexEncoded() {
-        def values = [id: "gorm://testEntity/list?name=Foo".encodeAsHex()]
+        def values = [q: "gorm://testEntity/list?name=Foo".encodeAsHex()]
         def params = new GrailsParameterMap(values, null)
         grailsApplication.config.selection.uri.encoding = 'hex'
         def uri = params.getSelectionURI()
@@ -171,15 +171,15 @@ class SelectionServiceTests extends GroovyTestCase {
 
     void testParameterMapURIName() {
         def uri = "gorm://testEntity/list".encodeAsBase64()
-        // 'id' is the default URI parameter name
-        def params = new GrailsParameterMap([id: uri], null)
+        // 'q' is the default URI parameter name
+        def params = new GrailsParameterMap([q: uri], null)
         assert params.getSelectionURI() != null
 
         // Change parameter name to 'uri
         grailsApplication.config.selection.uri.parameter = 'uri'
 
         // Not found using default parameter name anymore
-        params = new GrailsParameterMap([id: uri], null)
+        params = new GrailsParameterMap([q: uri], null)
         assert params.getSelectionURI() == null
 
         // It's found with the name 'uri'
