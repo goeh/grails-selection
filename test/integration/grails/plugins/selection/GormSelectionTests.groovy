@@ -94,6 +94,19 @@ public class GormSelectionTests extends GroovyTestCase {
         assert result.totalCount == 2
     }
 
+    void testListWithId() {
+
+        new TestEntity(number: "100", name: "Green").save()
+        new TestEntity(number: "101", name: "Blue").save()
+        def reference = new TestEntity(number: "102", name: "Red").save(flush: true)
+
+        def result = selectionService.select("gorm://test.TestEntity/list?id=" + reference.id)
+        assert result != null
+        assert result.size() == 1
+        assert result.totalCount == 1
+        assert result.find{it}.id == reference.id
+    }
+
     void testDomainShortName() {
         10.times {
             new TestEntity(number: "$it", name: "Number $it").save()

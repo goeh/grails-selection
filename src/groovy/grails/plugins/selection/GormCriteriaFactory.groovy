@@ -47,7 +47,11 @@ class GormCriteriaFactory {
         {Map query, Map params ->
             query.each {key, value ->
                 if (value) {
-                    ilike(key, wildcard(value))
+                    if(key == 'id') {
+                        eq(key, Long.valueOf(value))
+                    } else {
+                        ilike(key, wildcard(value))
+                    }
                 }
             }
         }
