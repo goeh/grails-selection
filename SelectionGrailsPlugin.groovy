@@ -21,7 +21,7 @@ import grails.plugins.selection.GrailsSelectionClass
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsParameterMap
 
 class SelectionGrailsPlugin {
-    def version = "0.9.8"
+    def version = "0.9.9-SNAPSHOT"
     def grailsVersion = "2.0 > *"
     def dependsOn = [:]
     def pluginExcludes = [
@@ -42,11 +42,17 @@ class SelectionGrailsPlugin {
     def authorEmail = "goran@technipelago.se"
     def description = '''\
 The selection plugin provides unified selection of information.
+
 It uses a URI based syntax to select any information from any resource.
+
 Grails plugins can add custom search providers.
+
 Example 1: gorm://person/list?name=Gr%25
+
 Example 2: ldap:dc=my-company&dc=com&cn=users
+
 Example 3: bean://myService/method
+
 Example 4: https://dialer.mycompany.com/outbound/next?agent=liza
 '''
 
