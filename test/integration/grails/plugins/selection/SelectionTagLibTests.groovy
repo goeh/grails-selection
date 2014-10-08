@@ -8,6 +8,7 @@ import grails.test.GroovyPagesTestCase
 class SelectionTagLibTests extends GroovyPagesTestCase {
 
     def grailsApplication
+    def selectionService
 
     void testSelectionLinkNoEncoding() {
 
@@ -51,6 +52,18 @@ class SelectionTagLibTests extends GroovyPagesTestCase {
         def uri = new URI("gorm://testEntity/list?name=A*")
         def template = '<select:link controller="testEntity" action="list" selection="\${uri}">Test</select:link>'
         assert applyTemplate(template, [uri: uri]) == '<a href="/testEntity/list?q=Z29ybTovL3Rlc3RFbnRpdHkvbGlzdD9uYW1lPUEq">Test</a>'
+    }
+
+    void testSelectionLinkWithQuery() {
+
+        // Initialize a known config.
+        grailsApplication.config.selection.uri.encoding = 'base64'
+        grailsApplication.config.selection.uri.parameter = 'q'
+
+        def uri = new URI("bean://queryService/list")
+        def query = [name:"Joe*", age:">42"]
+        def template = '<select:link controller="test" action="list" selection="\${uri}" query="\${query}">Test</select:link>'
+        assert applyTemplate(template, [uri: uri, query: query]) == '<a href="/test/list?q=YmVhbjovL3F1ZXJ5U2VydmljZS9saXN0P25hbWU9Sm9lKiZhZ2U9JTNFNDI%3D">Test</a>'
     }
 
     void testCreateLink() {

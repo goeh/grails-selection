@@ -14,6 +14,7 @@ class SelectionTagLib {
      * Create a link that includes a selection URI with encoding specified in Config.groovy [selection.uri.encoding].
      * @attr selection the selection uri to include in the link, if null or not specified this tag is equivalent to g:link
      * @attr parameter parameter name, if omitted config option 'selection.uri.parameter' or 'id' is used.
+     * @attr query optional Map with query values that will be appended to the URI specified by 'selection'.
      */
     def link = { attrs, body ->
         out << g.link(attrs.selection ? createLinkParams(attrs) : attrs, body)
@@ -31,6 +32,7 @@ class SelectionTagLib {
             out << (new URI(uri.toString()).query ? '&' : '?') // TODO Is uri.toString() correct here? encoding???
             out << grailsApplication.config.selection.uri.parameter ?: 'q'
             out << '='
+            // No selection specified so value is set to empty/null
         }
     }
 
@@ -74,6 +76,10 @@ class SelectionTagLib {
             def id = linkParams.remove('id')
             if (id != null) {
                 params.id = id
+            }
+            def query = linkParams.remove('query')
+            if(query) {
+                uri = selectionService.addQuery(uri, query)
             }
             params.putAll(selectionService.createSelectionParameters(uri, linkParams.remove('parameter')))
         }
