@@ -10,6 +10,7 @@ grails.project.dependency.resolution = {
     legacyResolve false
     repositories {
         grailsCentral()
+        mavenRepo "http://repo.grails.org/grails/repo/"
     }
 
     plugins {
