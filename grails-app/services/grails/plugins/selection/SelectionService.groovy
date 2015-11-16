@@ -66,6 +66,9 @@ class SelectionService {
      * @return a new URI instance with query appended
      */
     URI addQuery(URI uri, Map query) {
+        if(! query) {
+            return uri // Nothing to add, return original selection.
+        }
         def q = SelectionUtils.queryAsMap(uri.query)
         query.each { key, value ->
             if (value instanceof Collection) {
