@@ -10,15 +10,24 @@ grails.project.dependency.resolution = {
     legacyResolve false
     repositories {
         grailsCentral()
-        mavenRepo "http://repo.grails.org/grails/repo/"
+        mavenCentral()
+    }
+    dependencies {
+        /*test("javax.validation:validation-api:1.1.0.Final") { export = false }
+        test("org.hibernate:hibernate-validator:5.0.3.Final") { export = false }*/
+        test('org.springframework:spring-expression:4.0.5.RELEASE') { export = false }
+        test('org.springframework:spring-aop:4.0.5.RELEASE') { export = false }
+        test('org.hamcrest:hamcrest-all:1.3') { export = false }
     }
 
     plugins {
-        build(":tomcat:$grailsVersion",
-                ":release:2.2.1",
-                ":rest-client-builder:1.0.3") {
+        build(":release:3.1.2",
+                ":rest-client-builder:2.1.1") {
             export = false
         }
-        runtime(":hibernate:$grailsVersion") { export = false }
+        test(":hibernate4:4.3.6.1") {
+            excludes "net.sf.ehcache:ehcache-core"  // remove this when http://jira.grails.org/browse/GPHIB-18 is resolved
+            export = false
+        }
     }
 }

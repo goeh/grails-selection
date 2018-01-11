@@ -16,106 +16,132 @@
  */
 package grails.plugins.selection
 
-import org.junit.Before
+import grails.test.spock.IntegrationSpec
 import test.TestEntity
 
 /**
  * Integration test for the GORM Selection Provider (GormSelection.groovy).
  * @author Goran Ehrsson
  */
-public class GormSelectionTests extends GroovyTestCase {
+public class GormSelectionSpec extends IntegrationSpec {
 
     def grailsApplication
     def selectionService
     def gormSelection
 
-    @Before
-    void makeAllSelectable() {
+    def setup() {
         grailsApplication.config.selection.gorm = true
     }
 
-    void testConfiguration() {
+    def cleanup() {
+        gormSelection.fixedCriteria = null
+    }
+
+    void testConfiguration1() {
+        given:
         grailsApplication.config.selection.remove('gorm')
-        shouldFail(SecurityException) {
-            selectionService.select("gorm://test.TestEntity/list")
-        }
+        when:
+        selectionService.select("gorm://test.TestEntity/list")
+        then:
+        thrown(SecurityException)
+    }
 
+    def testConfiguration2() {
+        when:
+        grailsApplication.config.selection.remove('gorm')
         grailsApplication.config.selection.gorm.test.TestEntity = true
-        selectionService.select("gorm://test.TestEntity/list")
-        shouldFail(SecurityException) {
-            selectionService.select("gorm://test.TestEntity2/list")
-        }
+        then:
+        selectionService.select("gorm://test.TestEntity/list") != null
 
-        grailsApplication.config.selection.gorm.test = true
-        selectionService.select("gorm://test.TestEntity/list")
+        when:
         selectionService.select("gorm://test.TestEntity2/list")
+        then:
+        thrown(SecurityException)
+    }
+
+    def testConfiguration3() {
+        when:
+        grailsApplication.config.selection.remove('gorm')
+        grailsApplication.config.selection.gorm.test = true
+        then:
+        selectionService.select("gorm://test.TestEntity/list") != null
+        selectionService.select("gorm://test.TestEntity2/list") != null
     }
 
     void testNonExistingHandler() {
-        shouldFail(IllegalArgumentException) {
-            selectionService.select("dummy:foo")
-        }
+        when:
+        selectionService.select("dummy:foo")
+        then:
+        thrown(IllegalArgumentException)
     }
 
     void testNonExistingMethod() {
-        shouldFail(IllegalArgumentException) {
-            selectionService.select("gorm://test.TestEntity/dummy")
-        }
+        when:
+        selectionService.select("gorm://test.TestEntity/dummy")
+        then:
+        thrown(IllegalArgumentException)
     }
 
     void testUriParameter() {
+        when:
         new TestEntity(number: "1", name: "Foo").save()
         new TestEntity(number: "2", name: "Bar").save()
         new TestEntity(number: "3", name: "Baz").save()
-
-        assert selectionService.select("gorm://test.TestEntity/list").size() == 3
-        assert selectionService.select(new URI("gorm://test.TestEntity/list")).size() == 3
+        then:
+        selectionService.select("gorm://test.TestEntity/list").size() == 3
+        selectionService.select(new URI("gorm://test.TestEntity/list")).size() == 3
     }
 
     void testGet() {
-
+        when:
         def contact = new TestEntity(number: "1", name: "Foo").save(flush: true)
-        assert contact != null
-
+        then:
+        contact != null
+        when:
         def result = selectionService.select("gorm://test.TestEntity/get?id=${contact.id}")
-        assert result != null
-        assert result.name == "Foo"
+        then:
+        result != null
+        result.name == "Foo"
     }
 
     void testList() {
-
+        given:
         new TestEntity(number: "1", name: "Foo").save()
         new TestEntity(number: "2", name: "Bar").save()
         new TestEntity(number: "3", name: "Baz").save()
-
+        when:
         def result = selectionService.select("gorm://test.TestEntity/list?name=Ba", [max: 10])
-        assert result != null
-        assert result.size() == 2
-        assert result.totalCount == 2
+        then:
+        result != null
+        result.size() == 2
+        result.totalCount == 2
     }
 
     void testListWithId() {
-
+        given:
         new TestEntity(number: "100", name: "Green").save()
         new TestEntity(number: "101", name: "Blue").save()
         def reference = new TestEntity(number: "102", name: "Red").save(flush: true)
-
+        when:
         def result = selectionService.select("gorm://test.TestEntity/list?id=" + reference.id)
-        assert result != null
-        assert result.size() == 1
-        assert result.totalCount == 1
-        assert result.find{it}.id == reference.id
+        then:
+        result != null
+        result.size() == 1
+        result.totalCount == 1
+        result.find { it }.id == reference.id
     }
 
     void testDomainShortName() {
+        when:
         10.times {
             new TestEntity(number: "$it", name: "Number $it").save()
         }
-        assert selectionService.select("gorm://testEntity/list").size() == 10
+        then:
+        selectionService.select("gorm://testEntity/list").size() == 10
     }
 
     void testRandom() {
-
+        given:
         new TestEntity(number: "1", name: "One").save(flush: true)
         new TestEntity(number: "2", name: "Two").save(flush: true)
         new TestEntity(number: "3", name: "Three").save(flush: true)
@@ -126,40 +152,52 @@ public class GormSelectionTests extends GroovyTestCase {
         new TestEntity(number: "8", name: "Eight").save(flush: true)
         new TestEntity(number: "9", name: "Nine").save(flush: true)
         new TestEntity(number: "10", name: "Ten").save(flush: true)
-
+        when:
         def result = selectionService.select("gorm://test.TestEntity/random")
-        assert result != null
-        assert result instanceof TestEntity
-
+        then:
+        result != null
+        result instanceof TestEntity
+        when:
         result = selectionService.select("gorm://test.TestEntity/random", [max: 5])
-        assert result.size() == 5
+        then:
+        result.size() == 5
     }
 
     void testRandomHalf() {
+        given:
         100.times {
             new TestEntity(number: "$it", name: "Number $it").save()
         }
+        when:
         def result = selectionService.select("gorm://test.TestEntity/random", [max: 50])
-        assert result.size() == 50
+        then:
+        result.size() == 50
     }
 
     void testRandomTough() {
+        given:
         200.times {
             new TestEntity(number: "$it", name: "Number $it").save()
         }
+        when:
         def result = selectionService.select("gorm://test.TestEntity/random", [max: 199])
-        assert result.size() == 199
+        then:
+        result.size() == 199
     }
 
     void testRandomAll() {
+        given:
         100.times {
             new TestEntity(number: "$it", name: "Number $it").save()
         }
+        when:
         def result = selectionService.select("gorm://test.TestEntity/random", [max: 100])
-        assert result.size() == 100
+        then:
+        result.size() == 100
     }
 
     void testRandomWithCriteria() {
+        given:
         new TestEntity(number: "1", name: "One").save(flush: true)
         new TestEntity(number: "2", name: "Two").save(flush: true)
         new TestEntity(number: "3", name: "Three").save(flush: true)
@@ -173,12 +211,15 @@ public class GormSelectionTests extends GroovyTestCase {
         new TestEntity(number: "11", name: "Eleven").save(flush: true)
         new TestEntity(number: "12", name: "Twelve").save(flush: true)
         new TestEntity(number: "13", name: "Thirteen").save(flush: true)
+        when:
         def result = selectionService.select("gorm://test.TestEntity/random?name=" + "T%".encodeAsURL(), [max: 3])
-        assert result.size() == 3
-        result.each { assert it.name.startsWith('T') }
+        then:
+        result.size() == 3
+        result.findAll { it.name.startsWith('T') }.size() == 3
     }
 
     void testRandomFixedCriteria() {
+        given:
         new TestEntity(number: "1", name: "One").save(flush: true)
         new TestEntity(number: "2", name: "Two").save(flush: true)
         new TestEntity(number: "3", name: "Three").save(flush: true)
@@ -196,17 +237,15 @@ public class GormSelectionTests extends GroovyTestCase {
         gormSelection.fixedCriteria = { query, params ->
             ilike('name', 'T%')
         }
-        try {
-            def result = selectionService.select("gorm://test.TestEntity/random", [max: 3])
-            assert result.size() == 3
-            result.each { assert it.name.startsWith('T') }
-        } finally {
-            gormSelection.fixedCriteria = null
-        }
+        when:
+        def result = selectionService.select("gorm://test.TestEntity/random", [max: 3])
+        then:
+        result.size() == 3
+        result.findAll { it.name.startsWith('T') }.size() == 3
     }
 
     void testCustomCriteria() {
-
+        given:
         new TestEntity(name: "Joe Average", age: 40).save(flush: true)
         new TestEntity(name: "Linda Average", age: 37).save(flush: true)
         new TestEntity(name: "Jason Average", age: 11).save(flush: true)
@@ -233,6 +272,7 @@ public class GormSelectionTests extends GroovyTestCase {
                 }
             }
         }
+        when:
         try {
             // Test greater than.
             def result = selectionService.select("gorm://test.TestEntity/list?age=" + ">40".encodeAsURL())
@@ -265,6 +305,8 @@ public class GormSelectionTests extends GroovyTestCase {
         } finally {
             gormSelection.setCriteria(TestEntity, backup)
         }
+        then:
+        true
 
     }
 }
