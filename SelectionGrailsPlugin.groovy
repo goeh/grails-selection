@@ -99,6 +99,9 @@ Example 4: https://dialer.mycompany.com/outbound/next?agent=liza
             def collection = opts.collection
             def self = delegate
             def rval = [:]
+            if(collection instanceof String) {
+                collection = [collection]
+            }
             delegate.each {key, value ->
                 if (value && !key.startsWith('_') && !excludeList.contains(key)) {
                     rval[key] = collection?.contains(key) ? self.list(key) : value

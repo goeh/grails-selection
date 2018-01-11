@@ -76,7 +76,7 @@ class SelectionServiceSpec extends IntegrationSpec {
         query.multiple.contains('45')
     }
 
-    def testParameterMapWithListHint() {
+    def testParameterMapWithListHintMany() {
         when:
         def values = [single: '42', multiple: ['43', '44', '45'].toArray(new String[3])]
         def params = new GrailsParameterMap(values, null)
@@ -90,6 +90,18 @@ class SelectionServiceSpec extends IntegrationSpec {
         query.multiple.contains('45')
     }
 
+    def testParameterMapWithListHintOne() {
+        when:
+        def values = [single: '42', multiple: ['43'].toArray(new String[1])]
+        def params = new GrailsParameterMap(values, null)
+        def query = params.getSelectionQuery(collection: ['multiple'])
+        then:
+        query.single == '42'
+        (query.multiple instanceof List)
+        query.multiple.size() == 1
+        query.multiple.contains('43')
+    }
+
     def testParameterMapWithListHintSingle() {
         when:
         def values = [single: '42', multiple: '43']
@@ -100,6 +112,7 @@ class SelectionServiceSpec extends IntegrationSpec {
         query.single == '42'
         (query.multiple instanceof List)
         !query.multiple.contains('42')
+        query.multiple.size() == 1
         query.multiple.contains('43')
     }
 
