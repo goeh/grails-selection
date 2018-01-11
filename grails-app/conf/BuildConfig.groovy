@@ -29,5 +29,16 @@ grails.project.dependency.resolution = {
             excludes "net.sf.ehcache:ehcache-core"  // remove this when http://jira.grails.org/browse/GPHIB-18 is resolved
             export = false
         }
+        test(":codenarc:1.0") { export = false }
+        test(":code-coverage:2.0.3-3") { export = false }
+    }
+}
+
+codenarc.reports = {
+    xmlReport('xml') {
+        outputFile = 'target/CodeNarcReport.xml'
+    }
+    htmlReport('html') {
+        outputFile = 'target/CodeNarcReport.html'
     }
 }
