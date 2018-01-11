@@ -1,8 +1,7 @@
-# Ignore Intellij IDEA files
 .idea
 *.iml
+*.sha1
 
-# Ignore build artifacts
 target
 
 # Ignore packaged plugins
@@ -12,3 +11,5 @@ stacktrace.log
 plugin.xml
 
 .DS_Store
+
+/cobertura.ser

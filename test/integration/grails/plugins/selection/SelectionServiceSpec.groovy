@@ -271,7 +271,6 @@ class SelectionServiceSpec extends IntegrationSpec {
         // Initialize a known config.
         grailsApplication.config.selection.uri.encoding = 'none'
         grailsApplication.config.selection.uri.parameter = 'q'
-        def uri = new URI("gorm://testEntity/list?name=Foo&name=Bar")
         def values = [name: ["Foo", "Bar"].toArray(new String[2])]
         def params = new GrailsParameterMap(values, null)
         when:
@@ -285,7 +284,6 @@ class SelectionServiceSpec extends IntegrationSpec {
         // Initialize a known config.
         grailsApplication.config.selection.uri.encoding = 'none'
         grailsApplication.config.selection.uri.parameter = 'q'
-        def uri = new URI("gorm://testEntity/list?name=Foo&name=Bar")
         def values = [name: ["Foo", "Bar"]]
         def params = new GrailsParameterMap(values, null)
         when:
