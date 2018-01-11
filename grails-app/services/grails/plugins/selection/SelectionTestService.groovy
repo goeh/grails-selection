@@ -70,4 +70,9 @@ class SelectionTestService {
     String convert2(List words, Map conversionParams, Map otherParams) {
         convert1(words.join(otherParams.separator ?: ' '), conversionParams, otherParams)
     }
+
+    @Selectable
+    String list(Map<String, Object> query) {
+        query.items.join('+')
+    }
 }
