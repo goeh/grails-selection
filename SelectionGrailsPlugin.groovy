@@ -21,7 +21,7 @@ import grails.plugins.selection.GrailsSelectionClass
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsParameterMap
 
 class SelectionGrailsPlugin {
-    def version = "0.9.9-SNAPSHOT"
+    def version = "0.9.9"
     def grailsVersion = "2.0 > *"
     def dependsOn = [:]
     def pluginExcludes = [
